@@ -22,14 +22,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 26
+      - name: Select Xcode 26 (prefer stable over beta)
         run: |
-          # Pick the newest Xcode 26.x available on this runner
-          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
+          echo "Available Xcodes:"
+          ls -d /Applications/Xcode_*.app 2>/dev/null || true
+          echo ""
+
+          # Prefer a stable Xcode 26 release over beta builds.
+          # Names look like Xcode_26.app, Xcode_26.0.app, Xcode_26.5_beta_2.app
+          STABLE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i 'beta' | sort -V | tail -n 1)
+          BETA=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
+
+          XCODE="${STABLE:-$BETA}"
+
           if [ -z "$XCODE" ]; then
-            echo "::warning::Xcode 26 not found, using default"
-            XCODE=$(xcode-select -p)
+            echo "::warning::No Xcode 26 found, using runner default"
           else
+            echo "Selected: $XCODE"
             sudo xcode-select -s "$XCODE/Contents/Developer"
           fi
           xcodebuild -version
