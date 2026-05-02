@@ -16,7 +16,7 @@ path = "src/main.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-nativeblade-tauri = { path = "C:/xampp/htdocs/nativeblade-portal/vendor/nativeblade/nativeblade/rust" }
+nativeblade-tauri = { path = "../vendor/nativeblade/nativeblade/rust" }
 tauri = { version = "2", features = ["tray-icon", "image-png"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -49,8 +49,8 @@ tauri-plugin-upload = { version = "2", optional = true }
 tauri-plugin-biometric = { version = "2", optional = true }
 tauri-plugin-barcode-scanner = { version = "2", optional = true }
 tauri-plugin-nfc = { version = "2", optional = true }
-tauri-plugin-nativeblade-push = { path = "C:/xampp/htdocs/nativeblade-portal/vendor/nativeblade/nativeblade/rust/plugins/push", optional = true }
-tauri-plugin-nativeblade-media = { path = "C:/xampp/htdocs/nativeblade-portal/vendor/nativeblade/nativeblade/rust/plugins/media", optional = true }
+tauri-plugin-nativeblade-push = { path = "../vendor/nativeblade/nativeblade/rust/plugins/push", optional = true }
+tauri-plugin-nativeblade-media = { path = "../vendor/nativeblade/nativeblade/rust/plugins/media", optional = true }
 
 # nativeblade:plugins:start
 [features]
