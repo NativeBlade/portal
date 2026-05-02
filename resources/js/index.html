@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>nativeblade</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; color: #fff; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        #splash { display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; gap: 24px; }
+        .logo { font-size: 32px; font-weight: 700; color: #dc2626; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .logo-icon { width: 64px; height: 64px; background: rgba(220,38,38,0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #1f1f1f; border-top-color: #dc2626; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .status { font-size: 14px; color: #666; }
+        #app { display: none; flex: 1; width: 100%; border: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========= Dev shell (floating pill, parent-frame) ========= */
+        #nb-shell {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            right: 12px;
+            z-index: 2147483647;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            color: #e5e7eb;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        #nb-shell * { -webkit-tap-highlight-color: transparent; }
+        #nb-shell button, #nb-shell [role="button"] { -webkit-tap-highlight-color: transparent; outline: none; }
+        #nb-shell[hidden] { display: none !important; }
+        #nb-shell.collapsed #nb-shell-pill,
+        #nb-shell.collapsed #nb-shell-menu { display: none !important; }
+        #nb-shell.collapsed #nb-shell-mini { display: inline-flex; }
+
+        #nb-shell-mini {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            background: rgba(17, 17, 17, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #2a2a2a;
+            border-radius: 50%;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(192, 57, 43, 0.15);
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        #nb-shell-mini:hover { opacity: 1; transform: translateY(-1px); }
+        #nb-shell-mini.disconnected {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(239, 68, 68, 0.55);
+        }
+        #nb-shell-mini .nb-shell-dot { width: 8px; height: 8px; }
+
+        #nb-shell-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(17, 17, 17, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #2a2a2a;
+            border-radius: 999px;
+            padding: 8px 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(192, 57, 43, 0.15);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        #nb-shell-pill:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(192, 57, 43, 0.3); }
+        #nb-shell-pill:active { transform: translateY(0); }
+
+        .nb-shell-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+            animation: nb-pulse 2s ease-in-out infinite;
+            flex-shrink: 0;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nb-shell-dot.disconnected {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
+            animation: nb-pulse-fast 0.9s ease-in-out infinite;
+        }
+        @keyframes nb-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+        @keyframes nb-pulse-fast { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(1.2); } }
+
+        .nb-shell-host {
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #d1d5db;
+            font-weight: 600;
+        }
+        .nb-shell-caret { color: #6b7280; font-size: 10px; margin-left: 2px; }
+
+        #nb-shell-menu {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            min-width: 260px;
+            background: rgba(10, 10, 10, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(192, 57, 43, 0.2);
+            display: none;
+        }
+        #nb-shell-menu.open { display: block; }
+        .nb-shell-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6b7280;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .nb-shell-url {
+            font-size: 11px;
+            color: #9ca3af;
+            word-break: break-all;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #1f1f1f;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .nb-shell-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e5e7eb;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.12s ease, border-color 0.12s ease;
+        }
+        .nb-shell-btn + .nb-shell-btn { margin-top: 6px; }
+        .nb-shell-btn:hover { background: #222; border-color: #383838; }
+        .nb-shell-btn.danger:hover { background: rgba(192, 57, 43, 0.15); border-color: #c0392b; color: #fca5a5; }
+        .nb-shell-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        .nb-shell-hint {
+            font-size: 10px;
+            color: #4b5563;
+            text-align: center;
+            margin-top: 10px;
+            letter-spacing: 0.03em;
+        }
+        .nb-shell-hint kbd {
+            display: inline-block;
+            padding: 1px 6px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #9ca3af;
+            font-family: inherit;
+            font-size: 10px;
+        }
+
+        /* ========= Error overlay (Next.js-style) ========= */
+        #nb-error-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2147483646;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        #nb-error-overlay[hidden] { display: none !important; }
+
+        .nb-error-dialog {
+            width: 100%;
+            max-width: 720px;
+            max-height: calc(100vh - 48px);
+            background: #0a0a0a;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(239, 68, 68, 0.3), 0 0 80px rgba(239, 68, 68, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .nb-error-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(239, 68, 68, 0.08);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+        }
+        .nb-error-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #fca5a5;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .nb-error-type svg { width: 14px; height: 14px; }
+        .nb-error-spacer { flex: 1; }
+        .nb-error-close {
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            color: #9ca3af;
+            width: 28px; height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .nb-error-close:hover { background: #1a1a1a; color: #fff; border-color: #383838; }
+        .nb-error-close svg { width: 14px; height: 14px; }
+
+        .nb-error-body {
+            padding: 18px;
+            overflow: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        .nb-error-msg {
+            font-size: 14px;
+            color: #fca5a5;
+            margin-bottom: 10px;
+            font-weight: 600;
+            word-break: break-word;
+            line-height: 1.45;
+        }
+        .nb-error-source {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 14px;
+            word-break: break-all;
+        }
+        .nb-error-stack {
+            font-size: 11px;
+            color: #9ca3af;
+            background: #050505;
+            border: 1px solid #1f1f1f;
+            border-radius: 8px;
+            padding: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.55;
+            margin: 0;
+            max-height: 320px;
+            overflow: auto;
+        }
+        .nb-error-stack:empty { display: none; }
+    </style>
+</head>
+<body>
+<div id="splash">
+    <div class="logo">
+        <img src="/logo_nb.png" alt="Laravel" height="60">
+        nativeblade
+    </div>
+    <div class="spinner"></div>
+    <div class="status" id="status">Loading...</div>
+</div>
+<iframe id="app"></iframe>
+
+<!-- Dev shell: floating pill, only visible when connected to a remote bundle -->
+<div id="nb-shell" hidden>
+    <div id="nb-shell-mini" role="button" tabindex="0" aria-label="Show dev menu" title="Show dev menu">
+        <span class="nb-shell-dot" id="nb-shell-mini-dot"></span>
+    </div>
+    <div id="nb-shell-pill" role="button" tabindex="0" aria-label="Dev menu">
+        <span class="nb-shell-dot" id="nb-shell-dot" title="Dev server status"></span>
+        <span class="nb-shell-host" id="nb-shell-host"></span>
+        <span class="nb-shell-caret">&#9662;</span>
+    </div>
+    <div id="nb-shell-menu" role="menu">
+        <div class="nb-shell-label">Connected</div>
+        <div class="nb-shell-url" id="nb-shell-url"></div>
+        <button type="button" class="nb-shell-btn" id="nb-shell-reload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+            Reload
+        </button>
+        <button type="button" class="nb-shell-btn" id="nb-shell-hide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            Hide Pill
+        </button>
+        <button type="button" class="nb-shell-btn danger" id="nb-shell-disconnect">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            Disconnect
+        </button>
+        <div class="nb-shell-hint"><kbd>Ctrl</kbd> + <kbd>5</kbd> to toggle</div>
+    </div>
+</div>
+
+<!-- Error overlay modal -->
+<div id="nb-error-overlay" hidden>
+    <div class="nb-error-dialog" role="dialog" aria-labelledby="nb-error-title">
+        <header class="nb-error-head">
+                <span class="nb-error-type" id="nb-error-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="nb-error-type-label">Unhandled Error</span>
+                </span>
+            <span class="nb-error-spacer"></span>
+            <button type="button" class="nb-error-close" id="nb-error-close" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            </button>
+        </header>
+        <div class="nb-error-body">
+            <div class="nb-error-msg" id="nb-error-msg"></div>
+            <div class="nb-error-source" id="nb-error-source"></div>
+            <pre class="nb-error-stack" id="nb-error-stack"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Portal mode: if a dev bundle URL is persisted, expose it globally so
+    // filesystem.js and hot-reload.js pick it up before the app boots.
+    try {
+        var saved = localStorage.getItem('nb:bundleBase');
+        if (saved) window.__NB_BUNDLE_BASE__ = saved;
+    } catch (e) {}
+
+    // Escape hatch: Shift+Esc anywhere clears the remote bundle URL and
+    // reloads, dropping the user back into the "Connect" screen shipped
+    // inside this app's own bundle. Mobile users use the shell Disconnect
+    // button instead.
+    window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && e.shiftKey) {
+            try { localStorage.removeItem('nb:bundleBase'); } catch (_) {}
+            location.reload();
+        }
+    }, true);
+
+    // ========= Floating dev shell + error console =========
+    (function () {
+        var HIDDEN_KEY = 'nb:shellHidden';
+
+        var shell = document.getElementById('nb-shell');
+        var mini = document.getElementById('nb-shell-mini');
+        var miniDot = document.getElementById('nb-shell-mini-dot');
+        var pill = document.getElementById('nb-shell-pill');
+        var menu = document.getElementById('nb-shell-menu');
+        var dotEl = document.getElementById('nb-shell-dot');
+        var hostEl = document.getElementById('nb-shell-host');
+        var urlEl = document.getElementById('nb-shell-url');
+        var reloadBtn = document.getElementById('nb-shell-reload');
+        var hideBtn = document.getElementById('nb-shell-hide');
+        var disconnectBtn = document.getElementById('nb-shell-disconnect');
+
+        var overlay = document.getElementById('nb-error-overlay');
+        var errTypeLabel = document.getElementById('nb-error-type-label');
+        var errMsgEl = document.getElementById('nb-error-msg');
+        var errSourceEl = document.getElementById('nb-error-source');
+        var errStackEl = document.getElementById('nb-error-stack');
+        var errCloseBtn = document.getElementById('nb-error-close');
+
+        var seenKeys = Object.create(null);
+        var inErrorCapture = false;
+
+        function readBundle() {
+            try { return localStorage.getItem('nb:bundleBase'); }
+            catch (e) { return null; }
+        }
+        function hostOf(url) {
+            try { return new URL(url).host; } catch (e) { return url; }
+        }
+
+        function syncPill() {
+            var url = readBundle();
+            if (!url) {
+                // Hide entirely when not connected (nothing to show)
+                shell.setAttribute('data-has-bundle', 'false');
+                shell.hidden = true;
+                menu.classList.remove('open');
+                stopPing();
+                return;
+            }
+            shell.setAttribute('data-has-bundle', 'true');
+            shell.hidden = false;
+            hostEl.textContent = hostOf(url);
+            urlEl.textContent = url;
+            applyHidden();
+            startPing();
+        }
+
+        function toggleMenu(force) {
+            if (force === true) menu.classList.add('open');
+            else if (force === false) menu.classList.remove('open');
+            else menu.classList.toggle('open');
+        }
+
+        function isHidden() {
+            try { return localStorage.getItem(HIDDEN_KEY) === '1'; }
+            catch (e) { return false; }
+        }
+        function applyHidden() {
+            if (shell.getAttribute('data-has-bundle') !== 'true') return;
+            // Keep the shell mounted; collapse to mini dot when hidden so
+            // mobile users still have a tap target to bring it back.
+            if (isHidden()) {
+                shell.classList.add('collapsed');
+                menu.classList.remove('open');
+            } else {
+                shell.classList.remove('collapsed');
+            }
+        }
+        function setHidden(flag) {
+            try {
+                if (flag) localStorage.setItem(HIDDEN_KEY, '1');
+                else localStorage.removeItem(HIDDEN_KEY);
+            } catch (e) {}
+            applyHidden();
+        }
+        function togglePillVisibility() {
+            if (shell.getAttribute('data-has-bundle') !== 'true') return;
+            setHidden(!isHidden());
+        }
+
+        // ----- Vite health -----
+        //
+        // Two sources, both safe to run together:
+        //   1. postMessage from hot-reload.js inside the iframe (low latency)
+        //   2. Parent-side ping fallback against the bundle base URL — works
+        //      even if the iframe never loaded hot-reload.js (e.g. Vite went
+        //      down before the iframe could boot).
+
+        function setViteStatus(status) {
+            if (status === 'disconnected') {
+                dotEl.classList.add('disconnected');
+                miniDot.classList.add('disconnected');
+                mini.classList.add('disconnected');
+            } else {
+                dotEl.classList.remove('disconnected');
+                miniDot.classList.remove('disconnected');
+                mini.classList.remove('disconnected');
+            }
+        }
+        window.addEventListener('message', function (e) {
+            if (e && e.data && e.data.type === 'nb:vite-status') {
+                setViteStatus(e.data.status);
+            }
+        });
+
+        var pingTimer = null;
+        var PING_INTERVAL_MS = 4000;
+        var PING_TIMEOUT_MS = 3000;
+
+        async function pingOnce() {
+            var url = readBundle();
+            if (!url) return;
+            var ctrl = new AbortController();
+            var timer = setTimeout(function () { ctrl.abort(); }, PING_TIMEOUT_MS);
+            try {
+                // no-cors so we don't need CORS headers; opaque response
+                // is fine — we only care that the connection succeeded.
+                await fetch(url + '/?_nbping=' + Date.now(), {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: ctrl.signal,
+                });
+                setViteStatus('connected');
+            } catch (e) {
+                setViteStatus('disconnected');
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+        function startPing() {
+            if (pingTimer) return;
+            pingOnce();
+            pingTimer = setInterval(pingOnce, PING_INTERVAL_MS);
+        }
+        function stopPing() {
+            if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
+        }
+
+        // ----- Error capture -----
+
+        function fmtArg(a) {
+            if (a instanceof Error) return a.stack || a.message;
+            if (a && typeof a === 'object') {
+                try { return JSON.stringify(a, null, 2); } catch (e) { return String(a); }
+            }
+            return String(a);
+        }
+
+        function labelFor(type) {
+            switch (type) {
+                case 'error': return 'Unhandled Error';
+                case 'promise': return 'Unhandled Promise Rejection';
+                case 'console': return 'Console Error';
+                case 'iframe-error': return 'Unhandled Error (app)';
+                case 'iframe-promise': return 'Unhandled Promise Rejection (app)';
+                case 'iframe-console': return 'Console Error (app)';
+                default: return 'Error';
+            }
+        }
+
+        function showError(err) {
+            errTypeLabel.textContent = labelFor(err.type);
+            errMsgEl.textContent = err.message || '(no message)';
+            errSourceEl.textContent = err.source || '';
+            errSourceEl.style.display = err.source ? '' : 'none';
+            errStackEl.textContent = err.stack || '';
+            overlay.hidden = false;
+        }
+        function closeOverlay() { overlay.hidden = true; }
+
+        function addError(err) {
+            if (inErrorCapture) return;
+            inErrorCapture = true;
+            try {
+                var key = (err.type || '') + '|' + (err.message || '') + '|' + (err.stack || '').slice(0, 200);
+                if (seenKeys[key]) return;
+                seenKeys[key] = true;
+                showError(err);
+            } finally {
+                inErrorCapture = false;
+            }
+        }
+
+        function captureFromConsole(args, type) {
+            var msg = Array.prototype.map.call(args, fmtArg).join(' ');
+            if (!msg || !msg.trim()) return;
+            addError({
+                type: type || 'console',
+                message: msg.split('\n')[0].slice(0, 240),
+                stack: msg,
+                source: '',
+            });
+        }
+
+        function hookWindow(win, inIframe) {
+            try {
+                win.addEventListener('error', function (e) {
+                    addError({
+                        type: inIframe ? 'iframe-error' : 'error',
+                        message: (e && e.message) || 'Unknown error',
+                        stack: (e && e.error && e.error.stack) || '',
+                        source: e && e.filename ? (e.filename + ':' + e.lineno + ':' + e.colno) : '',
+                    });
+                });
+                win.addEventListener('unhandledrejection', function (e) {
+                    var r = e && e.reason;
+                    addError({
+                        type: inIframe ? 'iframe-promise' : 'promise',
+                        message: (r && r.message) || (r ? String(r) : 'Unhandled rejection'),
+                        stack: (r && r.stack) || '',
+                        source: '',
+                    });
+                });
+                var orig = win.console && win.console.error;
+                if (orig && !win.console.__nbHooked) {
+                    win.console.error = function () {
+                        try { captureFromConsole(arguments, inIframe ? 'iframe-console' : 'console'); } catch (_) {}
+                        return orig.apply(win.console, arguments);
+                    };
+                    win.console.__nbHooked = true;
+                }
+            } catch (e) {}
+        }
+
+        hookWindow(window, false);
+
+        var iframe = document.getElementById('app');
+        if (iframe) {
+            iframe.addEventListener('load', function () {
+                try { hookWindow(iframe.contentWindow, true); } catch (e) {}
+            });
+        }
+
+        // ----- Wiring -----
+
+        pill.addEventListener('click', function () { toggleMenu(); });
+        pill.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMenu(); }
+        });
+        document.addEventListener('click', function (e) {
+            if (!shell.contains(e.target) && !overlay.contains(e.target)) toggleMenu(false);
+        });
+
+        reloadBtn.addEventListener('click', function () {
+            (window.top || window).location.reload();
+        });
+        hideBtn.addEventListener('click', function () {
+            setHidden(true);
+        });
+        disconnectBtn.addEventListener('click', function () {
+            try { localStorage.removeItem('nb:bundleBase'); } catch (_) {}
+            (window.top || window).location.reload();
+        });
+
+        mini.addEventListener('click', function () { setHidden(false); });
+        mini.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setHidden(false); }
+        });
+
+        errCloseBtn.addEventListener('click', closeOverlay);
+        window.addEventListener('keydown', function (e) {
+            if (!overlay.hidden && e.key === 'Escape' && !e.shiftKey) {
+                closeOverlay();
+                return;
+            }
+            // Ctrl+5 / Cmd+5 — toggle the floating pill
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '5') {
+                e.preventDefault();
+                togglePillVisibility();
+            }
+        });
+
+        // Refresh pill if the iframe writes to nb:bundleBase / shellHidden
+        window.addEventListener('storage', function (e) {
+            if (!e.key || e.key === 'nb:bundleBase') syncPill();
+            if (!e.key || e.key === HIDDEN_KEY) applyHidden();
+        });
+        setTimeout(syncPill, 200);
+        setTimeout(syncPill, 1500);
+
+        syncPill();
+    })();
+</script>
+<script type="module" src="./nativeblade.js"></script>
+</body>
+</html>

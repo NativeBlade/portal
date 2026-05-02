@@ -1,0 +1,71 @@
+# Editors / IDEs
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.vscode
+/.zed
+/.fleet
+.phpactor.json
+_ide_helper.php
+.phpstorm.meta.php
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# PHP
+/vendor
+/.phpunit.cache
+.phpunit.result.cache
+
+# Composer
+/auth.json
+
+# Env
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+
+# Laravel
+/storage/*.key
+/storage/pail
+Homestead.json
+Homestead.yaml
+
+# Node
+/node_modules
+/public/build
+/public/hot
+/public/storage
+
+# NativeBlade — bundle output (regenerated on every build)
+/public/laravel-bundle.json
+/public/laravel-bundle.json.gz
+/public/laravel-bundle-*.json.gz
+/public/bundle-meta.json
+/public/nativeblade-config.json
+
+# NativeBlade — Vite WASM output (recreated each build)
+/dist-wasm
+
+# NativeBlade — final builds
+/build/
+
+# Tauri / Rust — generated artifacts
+/src-tauri/target
+/src-tauri/gen
+
+# Mobile signing — secrets, NEVER commit
+/src-tauri/keystore.properties
+/src-tauri/*.jks
+/src-tauri/*.keystore
+*.p12
+*.mobileprovision
+
+# Firebase
+/google-services.json
+/GoogleService-Info.plist

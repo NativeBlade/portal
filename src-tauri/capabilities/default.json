@@ -1,0 +1,219 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "default",
+    "description": "Capability for the main window",
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "core:default",
+        "core:event:default",
+        "geolocation:allow-check-permissions",
+        "geolocation:allow-request-permissions",
+        "geolocation:allow-get-current-position",
+        "geolocation:allow-watch-position",
+        "haptics:allow-impact-feedback",
+        "haptics:allow-notification-feedback",
+        "haptics:allow-selection-feedback",
+        "haptics:allow-vibrate",
+        "clipboard-manager:allow-read-text",
+        "clipboard-manager:allow-write-text",
+        "upload:default",
+        "notification:default",
+        "dialog:default",
+        "opener:default",
+        "store:default",
+        "fs:default",
+        "fs:allow-read",
+        "fs:allow-write",
+        "fs:allow-exists",
+        "fs:allow-mkdir",
+        "fs:allow-remove",
+        "fs:allow-rename",
+        "fs:allow-copy-file",
+        "fs:allow-stat",
+        "fs:allow-read-dir",
+        "fs:allow-read-file",
+        "fs:allow-write-file",
+        "http:default",
+        "deep-link:default",
+        "os:default",
+        "process:default",
+        "shell:allow-open",
+        {
+            "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "name": "cmd",
+                    "cmd": "cmd",
+                    "args": true
+                },
+                {
+                    "name": "cmd.exe",
+                    "cmd": "cmd.exe",
+                    "args": true
+                },
+                {
+                    "name": "powershell",
+                    "cmd": "powershell",
+                    "args": true
+                },
+                {
+                    "name": "powershell.exe",
+                    "cmd": "powershell.exe",
+                    "args": true
+                },
+                {
+                    "name": "wt",
+                    "cmd": "wt",
+                    "args": true
+                },
+                {
+                    "name": "wt.exe",
+                    "cmd": "wt.exe",
+                    "args": true
+                },
+                {
+                    "name": "sh",
+                    "cmd": "sh",
+                    "args": true
+                },
+                {
+                    "name": "bash",
+                    "cmd": "bash",
+                    "args": true
+                },
+                {
+                    "name": "osascript",
+                    "cmd": "osascript",
+                    "args": true
+                },
+                {
+                    "name": "gnome-terminal",
+                    "cmd": "gnome-terminal",
+                    "args": true
+                },
+                {
+                    "name": "konsole",
+                    "cmd": "konsole",
+                    "args": true
+                },
+                {
+                    "name": "xfce4-terminal",
+                    "cmd": "xfce4-terminal",
+                    "args": true
+                },
+                {
+                    "name": "xterm",
+                    "cmd": "xterm",
+                    "args": true
+                }
+            ]
+        },
+        {
+            "identifier": "shell:allow-spawn",
+            "allow": [
+                {
+                    "name": "cmd",
+                    "cmd": "cmd",
+                    "args": true
+                },
+                {
+                    "name": "cmd.exe",
+                    "cmd": "cmd.exe",
+                    "args": true
+                },
+                {
+                    "name": "powershell",
+                    "cmd": "powershell",
+                    "args": true
+                },
+                {
+                    "name": "powershell.exe",
+                    "cmd": "powershell.exe",
+                    "args": true
+                },
+                {
+                    "name": "wt",
+                    "cmd": "wt",
+                    "args": true
+                },
+                {
+                    "name": "wt.exe",
+                    "cmd": "wt.exe",
+                    "args": true
+                },
+                {
+                    "name": "sh",
+                    "cmd": "sh",
+                    "args": true
+                },
+                {
+                    "name": "bash",
+                    "cmd": "bash",
+                    "args": true
+                },
+                {
+                    "name": "osascript",
+                    "cmd": "osascript",
+                    "args": true
+                },
+                {
+                    "name": "gnome-terminal",
+                    "cmd": "gnome-terminal",
+                    "args": true
+                },
+                {
+                    "name": "konsole",
+                    "cmd": "konsole",
+                    "args": true
+                },
+                {
+                    "name": "xfce4-terminal",
+                    "cmd": "xfce4-terminal",
+                    "args": true
+                },
+                {
+                    "name": "xterm",
+                    "cmd": "xterm",
+                    "args": true
+                }
+            ]
+        },
+        {
+            "identifier": "fs:scope",
+            "allow": [
+                {
+                    "path": "$DOCUMENT"
+                },
+                {
+                    "path": "$DOCUMENT/**"
+                },
+                {
+                    "path": "$DOWNLOAD"
+                },
+                {
+                    "path": "$DOWNLOAD/**"
+                },
+                {
+                    "path": "$APPDATA"
+                },
+                {
+                    "path": "$APPDATA/**"
+                },
+                {
+                    "path": "$APPCACHE"
+                },
+                {
+                    "path": "$APPCACHE/**"
+                },
+                {
+                    "path": "$TEMP"
+                },
+                {
+                    "path": "$TEMP/**"
+                }
+            ]
+        }
+    ]
+}

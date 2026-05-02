@@ -1,0 +1,21 @@
+{
+    "identifier": "mobile",
+    "description": "Additional capabilities for mobile platforms",
+    "platforms": [
+        "android",
+        "iOS"
+    ],
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "nativeblade-media:default",
+        "nativeblade-push:default",
+        "biometric:default",
+        "barcode-scanner:allow-scan",
+        "barcode-scanner:allow-cancel",
+        "barcode-scanner:allow-check-permissions",
+        "barcode-scanner:allow-request-permissions",
+        "nfc:default"
+    ]
+}
