@@ -4,7 +4,7 @@ The `build-ios.yml` workflow builds and (optionally) uploads `Nativeblade.ipa` t
 
 You can ship iOS apps from a **Windows or Linux machine** without ever owning a Mac. Apple's developer portal accepts certificate requests generated anywhere — only the actual build needs macOS, which the GitHub runner provides.
 
-## One-time setup (≈ 30 minutes)
+## One-time setup (≈ 35 minutes)
 
 You'll generate a private key + Certificate Signing Request locally, exchange it for a distribution certificate at developer.apple.com, then convert and upload to GitHub.
 
@@ -51,7 +51,32 @@ openssl req -new -key apple-private.key \
 5. Profile Name: `Nativeblade App Store`
 6. Generate → Download `Nativeblade_App_Store.mobileprovision`
 
-### 5. Convert `.cer` to `.p12` (Git Bash)
+### 5. App Store Connect — Create the app record ⚠️
+
+> **Don't skip this step.** Without an App Store Connect record, the build will succeed and produce a valid signed IPA, but the upload to TestFlight will fail at the very end with:
+>
+> ```
+> ERROR: No suitable application records were found. Verify your bundle identifier
+>        "com.nativeblade.app" is correct and that you are signed in with an Apple ID
+>        that has access to the app in App Store Connect. (1190)
+> ```
+>
+> By that point you've already paid for ~30 minutes of CI time. Create the record before pushing the first tag.
+
+1. Go to <https://appstoreconnect.apple.com>
+2. **My Apps** → **+** → **New App**
+3. Fill in:
+   - **Platforms:** iOS
+   - **Name:** `Nativeblade` (or your app's name — this is what users see in the App Store)
+   - **Primary Language:** English (US) — or your locale
+   - **Bundle ID:** `com.nativeblade.app` (must match the App ID from step 3)
+   - **SKU:** any unique string for your records, e.g. `nativeblade-portal-001`
+   - **User Access:** Full Access
+4. Click **Create**
+
+You don't need to fill in the store listing, screenshots, descriptions, or pricing yet — just the record. Those go in before submitting for App Store review, but TestFlight uploads only need the record to exist.
+
+### 6. Convert `.cer` to `.p12` (Git Bash)
 
 ```bash
 # Convert Apple's binary cert to PEM
@@ -83,27 +108,27 @@ openssl pkcs12 -export \
 
 Replace `YourStrongPassword123` with your own — you'll add it to GitHub Secrets next.
 
-### 6. Encode certificate and profile to base64
+### 7. Encode certificate and profile to base64
 
 ```bash
 base64 -w 0 distribution.p12 > cert.b64
 base64 -w 0 Nativeblade_App_Store.mobileprovision > profile.b64
 ```
 
-### 7. Add GitHub Secrets
+### 8. Add GitHub Secrets
 
 Repository **Settings → Secrets and variables → Actions → New repository secret**:
 
 | Secret | Value |
 |--------|-------|
 | `IOS_DIST_CERT_BASE64` | Contents of `cert.b64` |
-| `IOS_DIST_CERT_PASSWORD` | The password you used in step 5 |
+| `IOS_DIST_CERT_PASSWORD` | The password you used in step 6 |
 | `IOS_PROFILE_BASE64` | Contents of `profile.b64` |
 | `APPLE_TEAM_ID` | 10-character Team ID from <https://developer.apple.com/account/membership> |
 | `APPLE_ID` | Your Apple ID email |
 | `APPLE_APP_PASSWORD` | App-specific password from <https://appleid.apple.com> → Sign-In and Security → App-Specific Passwords |
 
-### 8. Clean up local sensitive files
+### 9. Clean up local sensitive files
 
 ```bash
 rm distribution.cer distribution.pem distribution.p12 cert.b64 profile.b64
