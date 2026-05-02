@@ -113,6 +113,32 @@ rm Nativeblade_App_Store.mobileprovision
 # when the cert expires.
 ```
 
+## `.env.deploy` — the runtime config that ships
+
+The build needs an `.env` file at runtime. Your local `.env` is gitignored (correctly — it has dev URLs, debug flags, secrets, etc.) so CI can't use it.
+
+The convention: commit `.env.deploy` to the repo with **only the values needed at runtime**, no secrets. The workflow copies it to `.env` before building. If `.env.deploy` is missing, it falls back to `.env.example`, then to an empty file.
+
+Typical `.env.deploy` for a NativeBlade app:
+
+```env
+APP_NAME=YourApp
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=app://localhost
+
+DB_CONNECTION=sqlite
+SESSION_DRIVER=file
+CACHE_STORE=file
+QUEUE_CONNECTION=sync
+LOG_LEVEL=error
+```
+
+`APP_KEY` stays blank — `php artisan key:generate --force` runs before the build and fills it in. That generated key is per-build, which is fine because NativeBlade clients use it only for cookie/session encryption inside their own SQLite.
+
+Anything secret (API keys, third-party tokens) should NOT go in `.env.deploy`. Either inject via GitHub Secrets at build time (env vars → templated into `.env` via `sed` in the workflow), or fetch at runtime from your Laravel backend after authentication.
+
 ## Triggering a build
 
 **Tag push** (recommended for releases):

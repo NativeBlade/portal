@@ -56,14 +56,14 @@ jobs:
           composer install --no-dev --prefer-dist --no-progress
           npm ci
 
-      - name: Create .env from example
+      - name: Use .env.deploy as runtime .env
         run: |
-          if [ ! -f .env ]; then
-            if [ -f .env.example ]; then
-              cp .env.example .env
-            else
-              touch .env
-            fi
+          if [ -f .env.deploy ]; then
+            cp .env.deploy .env
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            touch .env
           fi
           php artisan key:generate --force || true
 
