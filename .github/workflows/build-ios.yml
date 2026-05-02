@@ -119,6 +119,46 @@ jobs:
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
 
+      - name: Write ExportOptions.plist
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_NAME: ${{ steps.profile.outputs.name }}
+        run: |
+          APPLE_DIR=$(find src-tauri/gen/apple -maxdepth 1 -type d -name "*.xcodeproj" -prune -o -type d -print | head -n 2 | tail -n 1)
+          # actually just use src-tauri/gen/apple as the directory
+          APPLE_DIR=src-tauri/gen/apple
+
+          cat > "$APPLE_DIR/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$APPLE_TEAM_ID</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.nativeblade.app</key>
+                  <string>$PROFILE_NAME</string>
+              </dict>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>uploadBitcode</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+
+          echo "ExportOptions.plist:"
+          cat "$APPLE_DIR/ExportOptions.plist"
+
       - name: Patch Xcode project for manual signing
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
