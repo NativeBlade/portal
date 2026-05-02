@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b2a9accb6863304996c61a81084c3d9c",
+    "content-hash": "24af4585359546471cdb69d9d052347a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2311,11 +2311,17 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "dev-main",
+            "version": "v1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/NativeBlade/NativeBlade.git",
+                "reference": "7b22da024b83dbc69c4ebcf549a867ae5c16f177"
+            },
             "dist": {
-                "type": "path",
-                "url": "../nativeblade",
-                "reference": "f9d649ee9bde3fc2534cb263d423550ee5f17979"
+                "type": "zip",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/7b22da024b83dbc69c4ebcf549a867ae5c16f177",
+                "reference": "7b22da024b83dbc69c4ebcf549a867ae5c16f177",
+                "shasum": ""
             },
             "require": {
                 "bacon/bacon-qr-code": "^3.0",
@@ -2330,46 +2336,32 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "providers": [
-                        "NativeBlade\\NativeBladeServiceProvider"
-                    ],
                     "aliases": {
                         "NativeBlade": "NativeBlade\\Facades\\NativeBlade"
-                    }
+                    },
+                    "providers": [
+                        "NativeBlade\\NativeBladeServiceProvider"
+                    ]
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "NativeBlade\\": "src/"
-                },
                 "files": [
                     "src/helpers.php"
-                ]
-            },
-            "autoload-dev": {
+                ],
                 "psr-4": {
-                    "NativeBlade\\Tests\\": "tests/"
+                    "NativeBlade\\": "src/"
                 }
             },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test:coverage": [
-                    "vendor/bin/phpunit --coverage-text"
-                ],
-                "test:coverage-html": [
-                    "vendor/bin/phpunit --coverage-html build/coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Build desktop and mobile apps with Laravel + Livewire",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/NativeBlade/NativeBlade/issues",
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.0"
+            },
+            "time": "2026-05-02T00:32:36+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -8612,9 +8604,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "nativeblade/nativeblade": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
