@@ -58,7 +58,23 @@ openssl req -new -key apple-private.key \
 openssl x509 -in distribution.cer -inform DER -out distribution.pem -outform PEM
 
 # Combine private key + cert into a password-protected .p12
+# The -legacy flag is REQUIRED — without it OpenSSL 3 uses AES/SHA-256
+# which macOS's `security` tool can't import (you'll get "MAC verification
+# failed (wrong password?)" in CI).
+openssl pkcs12 -export -legacy \
+  -inkey apple-private.key \
+  -in distribution.pem \
+  -out distribution.p12 \
+  -password pass:YourStrongPassword123
+```
+
+If your OpenSSL doesn't support `-legacy` (OpenSSL 1.x), specify the legacy ciphers manually:
+
+```bash
 openssl pkcs12 -export \
+  -keypbe PBE-SHA1-3DES \
+  -certpbe PBE-SHA1-3DES \
+  -macalg SHA1 \
   -inkey apple-private.key \
   -in distribution.pem \
   -out distribution.p12 \
@@ -135,6 +151,7 @@ For frequent releases, make the repo public, or pay for additional minutes.
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `code signing is required for product type 'Application'` | Profile/cert not imported | Verify base64 secrets are correct (no line breaks). Re-encode with `base64 -w 0`. |
+| `MAC verification failed during PKCS12 import (wrong password?)` | `.p12` generated with OpenSSL 3 default ciphers | Re-export with `openssl pkcs12 -export -legacy ...`, re-base64, update secret |
 | `No matching profiles found` | Bundle ID mismatch | App ID at developer.apple.com must be exactly `com.nativeblade.app` |
 | `altool: unable to upload — Invalid Team ID` | Wrong `APPLE_TEAM_ID` | Get the 10-char ID from Membership page, not Team Name |
 | `Invalid email or password` on TestFlight upload | Using main Apple ID password | Generate an app-specific password, never the account password |
