@@ -205,6 +205,33 @@ jobs:
           puts "Patched #{project.targets.size} target(s) for manual signing"
           RUBY
 
+      - name: Install xcodebuild shim (workaround for Xcode 26 + Tauri)
+        run: |
+          # Tauri 2 calls `xcodebuild` without `-destination`. Xcode 26 rejects
+          # this with "Found no destinations for the scheme". Shim adds
+          # `-destination generic/platform=iOS` to build/archive actions.
+          REAL=$(xcrun --find xcodebuild)
+          mkdir -p $HOME/.xcshim
+
+          cat > $HOME/.xcshim/xcodebuild <<EOF
+          #!/bin/bash
+          ARGS=("\$@")
+          HAS_DEST=false
+          NEEDS_DEST=false
+          for arg in "\${ARGS[@]}"; do
+            if [[ "\$arg" == "-destination" ]]; then HAS_DEST=true; fi
+            if [[ "\$arg" == "build" || "\$arg" == "archive" ]]; then NEEDS_DEST=true; fi
+          done
+          if ! \$HAS_DEST && \$NEEDS_DEST; then
+            ARGS+=("-destination" "generic/platform=iOS")
+          fi
+          exec "$REAL" "\${ARGS[@]}"
+          EOF
+
+          chmod +x $HOME/.xcshim/xcodebuild
+          echo "$HOME/.xcshim" >> "$GITHUB_PATH"
+          echo "Shim installed → $HOME/.xcshim/xcodebuild"
+
       - name: Build iOS
         env:
           APPLE_DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
