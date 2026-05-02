@@ -207,17 +207,25 @@ jobs:
 
       - name: Install iOS platform (Xcode 26 ships without it on macos-26 runner)
         run: |
-          # Check if iOS platform is installed for the selected Xcode
-          PLATFORM=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo "")
-          if [ -z "$PLATFORM" ] || [ ! -d "$PLATFORM" ]; then
-            echo "iOS SDK not installed, downloading..."
-            sudo xcodebuild -downloadPlatform iOS -quiet || sudo xcodebuild -downloadPlatform iOS
-          else
-            echo "iOS SDK already at: $PLATFORM"
-          fi
+          echo "=== Before ==="
+          xcodebuild -showsdks 2>&1 | grep -i ios || true
+          xcrun simctl list runtimes 2>&1 | grep -i ios || true
+          echo ""
 
-          # List what we have now
-          xcodebuild -showsdks 2>/dev/null | grep -i ios || true
+          echo "=== Downloading all platforms ==="
+          sudo xcodebuild -runFirstLaunch || true
+          sudo xcodebuild -downloadAllPlatforms 2>&1 | tail -30 || true
+
+          echo ""
+          echo "=== After ==="
+          xcodebuild -showsdks 2>&1 | grep -i ios || true
+          xcrun simctl list runtimes 2>&1 | grep -i ios || true
+
+          # Verify the SDK we need is now installed
+          if ! xcodebuild -showsdks 2>&1 | grep -q "iphoneos"; then
+            echo "::error::iOS SDK still not available after download attempt"
+            exit 1
+          fi
 
       - name: Install xcodebuild shim (workaround for Xcode 26 + Tauri)
         run: |
