@@ -69,3 +69,6 @@ Homestead.yaml
 # Firebase
 /google-services.json
 /GoogleService-Info.plist
+
+# Certs
+/certs
