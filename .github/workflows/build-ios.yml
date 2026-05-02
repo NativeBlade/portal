@@ -119,28 +119,39 @@ jobs:
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
 
+      - name: Patch Xcode project for manual signing
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          PROFILE_UUID: ${{ steps.profile.outputs.uuid }}
+        run: |
+          PROJECT=$(find src-tauri/gen/apple -name "*.xcodeproj" | head -n 1)
+          if [ -z "$PROJECT" ]; then
+            echo "::error::No .xcodeproj found"
+            exit 1
+          fi
+
+          ruby <<RUBY
+          require 'xcodeproj'
+
+          project = Xcodeproj::Project.open('$PROJECT')
+          project.targets.each do |target|
+            target.build_configurations.each do |config|
+              config.build_settings['CODE_SIGN_STYLE']               = 'Manual'
+              config.build_settings['DEVELOPMENT_TEAM']              = ENV['APPLE_TEAM_ID']
+              config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ENV['PROFILE_UUID']
+              config.build_settings['CODE_SIGN_IDENTITY']            = 'Apple Distribution'
+              config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = 'Apple Distribution'
+            end
+          end
+          project.save
+          puts "Patched #{project.targets.size} target(s) for manual signing"
+          RUBY
+
       - name: Build iOS
         env:
           APPLE_DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_CERTIFICATE: ${{ secrets.IOS_DIST_CERT_BASE64 }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
-          APPLE_PROVISIONING_PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
-          PROFILE_UUID: ${{ steps.profile.outputs.uuid }}
-          PROFILE_NAME: ${{ steps.profile.outputs.name }}
         run: |
-          # Manual signing config — pinned to the exact profile we uploaded.
-          # Without this, Xcode falls back to automatic signing and tries to
-          # log in with an Apple ID, which CI doesn't have.
-          if [ -d src-tauri/gen/apple ]; then
-            cat > src-tauri/gen/apple/project.xcconfig <<EOF
-          DEVELOPMENT_TEAM = $APPLE_DEVELOPMENT_TEAM
-          CODE_SIGN_STYLE = Manual
-          PROVISIONING_PROFILE_SPECIFIER = $PROFILE_UUID
-          CODE_SIGN_IDENTITY = Apple Distribution
-          EOF
-          fi
-
           php artisan nativeblade:build ios
 
       - name: Locate IPA
