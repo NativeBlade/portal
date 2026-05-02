@@ -92,12 +92,26 @@ jobs:
           security list-keychains -d user -s $RUNNER_TEMP/build.keychain login.keychain
 
       - name: Install provisioning profile
+        id: profile
         env:
           IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$IOS_PROFILE_BASE64" | base64 --decode \
-            > ~/Library/MobileDevice/Provisioning\ Profiles/distribution.mobileprovision
+          PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/distribution.mobileprovision
+          echo "$IOS_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          # Extract UUID and name from the mobileprovision (it's a CMS-signed plist)
+          PROFILE_PLIST=$(security cms -D -i "$PROFILE_PATH")
+          PROFILE_UUID=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin)
+          PROFILE_NAME=$(echo "$PROFILE_PLIST" | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin)
+
+          echo "uuid=$PROFILE_UUID" >> "$GITHUB_OUTPUT"
+          echo "name=$PROFILE_NAME" >> "$GITHUB_OUTPUT"
+
+          # Move profile to the UUID-named location Xcode actually looks at
+          cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$PROFILE_UUID".mobileprovision
+
+          echo "Installed profile: $PROFILE_NAME ($PROFILE_UUID)"
 
       - name: Add iOS platform
         run: php artisan nativeblade:add ios
@@ -112,12 +126,18 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.IOS_DIST_CERT_BASE64 }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
           APPLE_PROVISIONING_PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
+          PROFILE_UUID: ${{ steps.profile.outputs.uuid }}
+          PROFILE_NAME: ${{ steps.profile.outputs.name }}
         run: |
-          # Inject team ID into Xcode project xcconfig (belt and suspenders)
+          # Manual signing config — pinned to the exact profile we uploaded.
+          # Without this, Xcode falls back to automatic signing and tries to
+          # log in with an Apple ID, which CI doesn't have.
           if [ -d src-tauri/gen/apple ]; then
             cat > src-tauri/gen/apple/project.xcconfig <<EOF
           DEVELOPMENT_TEAM = $APPLE_DEVELOPMENT_TEAM
           CODE_SIGN_STYLE = Manual
+          PROVISIONING_PROFILE_SPECIFIER = $PROFILE_UUID
+          CODE_SIGN_IDENTITY = Apple Distribution
           EOF
           fi
 
