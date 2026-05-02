@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "24af4585359546471cdb69d9d052347a",
+    "content-hash": "ae8a84310cb03b77bef131dea37ea54d",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2311,16 +2311,16 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "v1.4.0",
+            "version": "v1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/NativeBlade.git",
-                "reference": "7b22da024b83dbc69c4ebcf549a867ae5c16f177"
+                "reference": "d794f0be22df4ebadb15272af30f6d5285cdc003"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/7b22da024b83dbc69c4ebcf549a867ae5c16f177",
-                "reference": "7b22da024b83dbc69c4ebcf549a867ae5c16f177",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/d794f0be22df4ebadb15272af30f6d5285cdc003",
+                "reference": "d794f0be22df4ebadb15272af30f6d5285cdc003",
                 "shasum": ""
             },
             "require": {
@@ -2359,9 +2359,9 @@
             "description": "Build desktop and mobile apps with Laravel + Livewire",
             "support": {
                 "issues": "https://github.com/NativeBlade/NativeBlade/issues",
-                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.0"
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.1"
             },
-            "time": "2026-05-02T00:32:36+00:00"
+            "time": "2026-05-02T16:55:09+00:00"
         },
         {
             "name": "nesbot/carbon",
