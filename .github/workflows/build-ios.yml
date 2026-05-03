@@ -209,19 +209,24 @@ jobs:
         run: |
           echo "=== Before ==="
           xcodebuild -showsdks 2>&1 | grep -i ios || true
-          xcrun simctl list runtimes 2>&1 | grep -i ios || true
-          echo ""
 
-          echo "=== Downloading all platforms ==="
+          # Skip the download if iOS SDK is already eligible for build
+          if xcodebuild -showsdks 2>&1 | grep -qE "iOS [0-9]+\.[0-9]+ +-sdk iphoneos"; then
+            ELIGIBLE=$(xcrun --sdk iphoneos --show-sdk-platform-path 2>/dev/null)
+            if [ -n "$ELIGIBLE" ] && [ -d "$ELIGIBLE" ]; then
+              echo "iOS platform already installed at $ELIGIBLE"
+              exit 0
+            fi
+          fi
+
+          echo "=== Downloading iOS platform only (~8GB, skipping watchOS/tvOS/visionOS) ==="
           sudo xcodebuild -runFirstLaunch || true
-          sudo xcodebuild -downloadAllPlatforms 2>&1 | tail -30 || true
+          sudo xcodebuild -downloadPlatform iOS 2>&1 | grep -vE "^Downloading.*\([0-9.]+%" | tail -20 || true
 
           echo ""
           echo "=== After ==="
           xcodebuild -showsdks 2>&1 | grep -i ios || true
-          xcrun simctl list runtimes 2>&1 | grep -i ios || true
 
-          # Verify the SDK we need is now installed
           if ! xcodebuild -showsdks 2>&1 | grep -q "iphoneos"; then
             echo "::error::iOS SDK still not available after download attempt"
             exit 1
