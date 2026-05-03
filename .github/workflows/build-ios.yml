@@ -24,23 +24,45 @@ jobs:
 
       - name: Select stable Xcode 26 (App Store rejects beta builds)
         run: |
+          # Returns "Beta" if the Xcode at $1 is a beta build, "GM" otherwise.
+          # Checks (in order):
+          #   1. LicenseInfo.plist licenseType (most reliable: "Beta" or "GM")
+          #   2. Path contains 'beta'
+          #   3. ProductBuildVersion has a trailing letter (Apple beta seed marker, e.g. "17F5054h")
+          xcode_kind() {
+            local app="$1"
+            local L
+            L=$(defaults read "$app/Contents/Resources/LicenseInfo.plist" licenseType 2>/dev/null || echo "")
+            case "$L" in Beta|*[Bb]eta*) echo "Beta"; return ;; esac
+            case "$app" in *[Bb][Ee][Tt][Aa]*) echo "Beta"; return ;; esac
+            local B
+            B=$(defaults read "$app/Contents/version.plist" ProductBuildVersion 2>/dev/null || echo "")
+            if echo "$B" | grep -qE '^[0-9]+[A-Z][0-9]+[a-z]$'; then
+              echo "Beta"
+              return
+            fi
+            echo "GM"
+          }
+
           echo "=== Available Xcode installations ==="
           for app in /Applications/Xcode*.app; do
             [ -d "$app" ] || continue
             V=$(defaults read "$app/Contents/version.plist" CFBundleShortVersionString 2>/dev/null || echo "?")
             B=$(defaults read "$app/Contents/version.plist" ProductBuildVersion 2>/dev/null || echo "?")
-            echo "  $app  ->  $V ($B)"
+            L=$(defaults read "$app/Contents/Resources/LicenseInfo.plist" licenseType 2>/dev/null || echo "?")
+            K=$(xcode_kind "$app")
+            echo "  $app  ->  $V ($B)  [license: $L, kind: $K]"
           done
           echo ""
 
-          # Pick the highest stable Xcode 26+. Skip anything with 'beta' in its
-          # path, since the App Store rejects builds whose Info.plist DTXcode
-          # comes from a beta toolchain.
+          # Pick the highest stable Xcode 26+ (excluding any beta).
           SELECTED=""
           SELECTED_VERSION=""
           for app in /Applications/Xcode*.app; do
             [ -d "$app" ] || continue
-            case "$app" in *[Bb][Ee][Tt][Aa]*) continue ;; esac
+
+            K=$(xcode_kind "$app")
+            [ "$K" = "Beta" ] && continue
 
             V=$(defaults read "$app/Contents/version.plist" CFBundleShortVersionString 2>/dev/null || echo "0")
             case "$V" in 26*|27*|28*) ;; *) continue ;; esac
@@ -54,7 +76,7 @@ jobs:
           if [ -z "$SELECTED" ]; then
             echo "::error::No stable Xcode 26+ found on this runner."
             echo "::error::Builds made with beta Xcode are rejected by the App Store."
-            echo "::error::Either wait for the runner image to ship stable Xcode 26,"
+            echo "::error::Wait for the runner image to ship stable Xcode 26,"
             echo "::error::or switch 'runs-on:' to a runner that has it preinstalled."
             exit 1
           fi
