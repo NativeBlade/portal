@@ -229,32 +229,24 @@ jobs:
           puts "Patched #{project.targets.size} target(s) for manual signing"
           RUBY
 
-      - name: Install iOS platform (Xcode 26 ships without it on macos-26 runner)
+      - name: Verify iOS device SDK is present
         run: |
-          echo "=== Before ==="
+          echo "=== iOS SDKs available ==="
           xcodebuild -showsdks 2>&1 | grep -i ios || true
-
-          # Skip the download if iOS SDK is already eligible for build
-          if xcodebuild -showsdks 2>&1 | grep -qE "iOS [0-9]+\.[0-9]+ +-sdk iphoneos"; then
-            ELIGIBLE=$(xcrun --sdk iphoneos --show-sdk-platform-path 2>/dev/null)
-            if [ -n "$ELIGIBLE" ] && [ -d "$ELIGIBLE" ]; then
-              echo "iOS platform already installed at $ELIGIBLE"
-              exit 0
-            fi
-          fi
-
-          echo "=== Downloading iOS platform only (~8GB, skipping watchOS/tvOS/visionOS) ==="
-          sudo xcodebuild -runFirstLaunch || true
-          sudo xcodebuild -downloadPlatform iOS 2>&1 | grep -vE "^Downloading.*\([0-9.]+%" | tail -20 || true
-
           echo ""
-          echo "=== After ==="
-          xcodebuild -showsdks 2>&1 | grep -i ios || true
 
-          if ! xcodebuild -showsdks 2>&1 | grep -q "iphoneos"; then
-            echo "::error::iOS SDK still not available after download attempt"
-            exit 1
+          # We only build for iOS devices (archive + IPA), so the iphoneos
+          # device SDK is sufficient. We do NOT need the iOS Simulator runtime
+          # (~8GB), which is what `-downloadPlatform iOS` actually fetches when
+          # the device SDK is already installed.
+          if xcodebuild -showsdks 2>&1 | grep -qE "iOS [0-9]+\.[0-9]+ +-sdk iphoneos"; then
+            echo "iOS device SDK is available, ready to build."
+            exit 0
           fi
+
+          echo "::error::iOS device SDK (iphoneos) not found on this runner."
+          echo "::error::The macos runner image needs Xcode with iOS platform components."
+          exit 1
 
       - name: Install xcodebuild shim (workaround for Xcode 26 + Tauri)
         run: |
