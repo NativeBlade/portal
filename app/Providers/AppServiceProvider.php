@@ -12,6 +12,9 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
+    CONST VERSION = '1.0.1';
+    const VERSION_NUMBER = 2;
+
     public function register(): void
     {
         //
@@ -28,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         NativeBladeConfig::desktop(function (DesktopConfig $config) {
             $config->title('Nativeblade')
                 ->identifier('com.nativeblade.app')
-                ->version('1.0.0', 1)
+                ->version(self::VERSION, self::VERSION_NUMBER)
                 ->size(1200, 800)
                 ->icon('src-tauri/icons/logo.png')
                 ->minSize(800, 600)
@@ -39,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
 
         NativeBladeConfig::android(function (AndroidConfig $config) {
             $config->identifier('com.nativeblade.app')
-                ->version('1.0.0', 1)
+                ->version(self::VERSION, self::VERSION_NUMBER)
                 ->minSdk(28)
                 ->targetSdk(34)
                 ->orientation('portrait')
@@ -60,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
 
         NativeBladeConfig::ios(function (IosConfig $config) {
             $config->identifier('com.nativeblade.app')
-                ->version('1.0.0', 1)
+                ->version(self::VERSION, self::VERSION_NUMBER)
                 ->minIosVersion('15.0')
                 ->orientation('portrait')
                 ->statusBar(style: 'dark')
