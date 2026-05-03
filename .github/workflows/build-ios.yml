@@ -261,7 +261,7 @@ jobs:
           # device SDK is sufficient. We do NOT need the iOS Simulator runtime
           # (~8GB), which is what `-downloadPlatform iOS` actually fetches when
           # the device SDK is already installed.
-          if xcodebuild -showsdks 2>&1 | grep -qE "iOS [0-9]+\.[0-9]+ +-sdk iphoneos"; then
+          if xcodebuild -showsdks 2>&1 | grep -qE "iphoneos[0-9]"; then
             echo "iOS device SDK is available, ready to build."
             exit 0
           fi
