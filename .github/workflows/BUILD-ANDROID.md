@@ -1,6 +1,6 @@
 # GitHub Actions, Android build
 
-The `build-android.yml` workflow produces a signed AAB (and APK) on every `v*` tag push, or on manual `workflow_dispatch`. With `upload_to_play` enabled, it also pushes to the Play Console internal track.
+The `build-android.yml` workflow produces a signed AAB (and APK) on every `v*` tag push, or on manual `workflow_dispatch`. Artifacts are uploaded to the run page; download and upload to Play Console manually.
 
 Runs on `ubuntu-latest` (cheap, ~6 minutes Linux time per build on free tier).
 
@@ -50,41 +50,6 @@ rm keystore.b64
 
 Keep `upload-keystore.jks` in your encrypted backup; the framework gitignores it from the repo automatically.
 
-## Optional: Play Console auto upload
-
-If you want the workflow to push to Play Console internal track on each tag, add one more secret.
-
-### A. Create a service account in Google Cloud
-
-1. Go to <https://console.cloud.google.com/iam-admin/serviceaccounts>
-2. Create a project if you don't have one
-3. Create service account, give it any name, no roles needed at this step
-4. Click into the new account, go to **Keys** tab, **Add Key > Create new key > JSON**, download the file
-
-### B. Grant Play Console access
-
-1. Go to <https://play.google.com/console> > **Setup > API access**
-2. Link the Google Cloud project from step A
-3. Grant access to the service account, give it permission **Release apps to testing tracks**
-4. Choose your app (`com.nativeblade.app`) under app permissions
-
-### C. Add the JSON as a GitHub Secret
-
-| Secret | Value |
-|--------|-------|
-| `PLAY_SERVICE_ACCOUNT_JSON` | Full contents of the JSON file from step A |
-
-### D. Pre create the app in Play Console
-
-The auto upload action requires the app to already exist in Play Console with the same package name (`com.nativeblade.app`). Create it manually first:
-
-1. Go to <https://play.google.com/console> > **Create app**
-2. App name: `Nativeblade`
-3. Default language: any
-4. Free or paid
-5. Confirm declarations
-6. Submit at least one manual upload first (the auto upload won't work as the very first release)
-
 ## Triggering a build
 
 **Tag push** (recommended for releases):
@@ -93,10 +58,9 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The workflow runs automatically and uploads to Play Console internal track if configured.
+**Manual run**: Actions tab > Build Android > Run workflow.
 
-**Manual run** (Actions tab > Build Android > Run workflow):
-- Toggle "Upload to Play Console" if you want it submitted; leave off for a download only AAB artifact.
+In both cases, the AAB and APK appear as downloadable artifacts on the run page.
 
 ## Cost
 
@@ -108,7 +72,6 @@ Linux runner is included in the free tier for public repos. For private repos, u
 |-------|-------|-----|
 | `Keystore was tampered with, or password was incorrect` | Wrong password in secret, or keystore corrupted during base64 | Re-run `base64 -w 0`, paste the full string into the secret |
 | `INSTALL_FAILED_INVALID_APK` on real device | Unsigned or wrong signature | Confirm `nativeblade:sign android` ran in CI logs and produced `keystore.properties` |
-| `Failure when receiving data from the peer` on Play upload | Service account missing release permission | Re-check Play Console > API access > service account permissions |
 | `Could not find android NDK` | NDK version mismatch | Adjust `packages: ndk;26.1.10909125` in workflow to a version available in `setup-android` |
 | Build hangs at "Configure project" | Gradle download from a slow region | Re-run; usually transient |
 
