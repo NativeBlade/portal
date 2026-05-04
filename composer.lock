@@ -2311,16 +2311,16 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "v1.4.6",
+            "version": "v1.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/NativeBlade.git",
-                "reference": "4c2ce82fe8906d0978f47244c7d6cceda0ffc628"
+                "reference": "7f3920aed3a3965cf66834b0498d2465f3f8709c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/4c2ce82fe8906d0978f47244c7d6cceda0ffc628",
-                "reference": "4c2ce82fe8906d0978f47244c7d6cceda0ffc628",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/7f3920aed3a3965cf66834b0498d2465f3f8709c",
+                "reference": "7f3920aed3a3965cf66834b0498d2465f3f8709c",
                 "shasum": ""
             },
             "require": {
@@ -2359,9 +2359,9 @@
             "description": "Build desktop and mobile apps with Laravel + Livewire",
             "support": {
                 "issues": "https://github.com/NativeBlade/NativeBlade/issues",
-                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.6"
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.8"
             },
-            "time": "2026-05-03T11:16:34+00:00"
+            "time": "2026-05-04T15:37:10+00:00"
         },
         {
             "name": "nesbot/carbon",

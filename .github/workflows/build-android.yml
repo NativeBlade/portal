@@ -1,0 +1,167 @@
+name: Build Android
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      upload_to_play:
+        description: 'Upload to Play Console after build'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      JAVA_VERSION: '17'
+      NODE_VERSION: '20'
+      PHP_VERSION: '8.3'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0 ndk;26.1.10909125'
+
+      - name: Export NDK paths
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, intl, dom, fileinfo, sqlite3, pdo_sqlite, gd
+          coverage: none
+          tools: composer:v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: cargo-android-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: cargo-android-
+
+      - name: Install dependencies
+        run: |
+          composer install --no-dev --prefer-dist --no-progress
+          npm ci
+
+      - name: Use .env.deploy as runtime .env
+        run: |
+          if [ -f .env.deploy ]; then
+            cp .env.deploy .env
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            touch .env
+          fi
+          php artisan key:generate --force || true
+
+      - name: Add Android platform
+        run: php artisan nativeblade:add android
+
+      - name: Configure NativeBlade
+        run: php artisan nativeblade:config
+
+      - name: Decode keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p src-tauri/gen/android
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/upload-keystore.jks
+          if [ ! -s src-tauri/gen/android/upload-keystore.jks ]; then
+            echo "::error::Keystore decode failed (empty file). Check ANDROID_KEYSTORE_BASE64 secret."
+            exit 1
+          fi
+
+      - name: Configure signing
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ALIAS="${ANDROID_KEY_ALIAS:-upload}"
+          KEYPASS="${ANDROID_KEY_PASSWORD:-$ANDROID_KEYSTORE_PASSWORD}"
+          php artisan nativeblade:sign android \
+            --keystore-path="$(pwd)/src-tauri/gen/android/upload-keystore.jks" \
+            --keystore-password="$ANDROID_KEYSTORE_PASSWORD" \
+            --key-password="$KEYPASS" \
+            --alias="$ALIAS"
+
+      - name: Build Android
+        run: php artisan nativeblade:build android
+
+      - name: Locate artifacts
+        id: artifacts
+        run: |
+          AAB=$(find build/android src-tauri/gen/android -name "*.aab" | head -n 1)
+          APK=$(find build/android src-tauri/gen/android -name "*.apk" | head -n 1)
+
+          if [ -z "$AAB" ] && [ -z "$APK" ]; then
+            echo "::error::No AAB or APK produced"
+            exit 1
+          fi
+
+          [ -n "$AAB" ] && echo "aab=$AAB" >> "$GITHUB_OUTPUT" && echo "Built AAB: $AAB"
+          [ -n "$APK" ] && echo "apk=$APK" >> "$GITHUB_OUTPUT" && echo "Built APK: $APK"
+
+      - name: Upload AAB artifact
+        if: steps.artifacts.outputs.aab != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: ${{ steps.artifacts.outputs.aab }}
+          retention-days: 14
+
+      - name: Upload APK artifact
+        if: steps.artifacts.outputs.apk != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: ${{ steps.artifacts.outputs.apk }}
+          retention-days: 14
+
+      - name: Upload to Play Console
+        if: (github.event.inputs.upload_to_play == 'true' || startsWith(github.ref, 'refs/tags/v')) && steps.artifacts.outputs.aab != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.nativeblade.app
+          releaseFiles: ${{ steps.artifacts.outputs.aab }}
+          track: internal
+          status: completed
