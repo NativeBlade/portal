@@ -12,8 +12,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.0.4';
-    const VERSION_NUMBER = 5;
+    CONST VERSION = '1.0.6';
+    const VERSION_NUMBER = 7;
 
     public function register(): void
     {
@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
             $config->identifier('com.nativeblade.app')
                 ->version(self::VERSION, self::VERSION_NUMBER)
                 ->minSdk(28)
-                ->targetSdk(34)
+                ->targetSdk(35)
                 ->orientation('portrait')
                 ->statusBar(style: 'dark', color: '#0a0a0a')
                 ->navigationBar('#0a0a0a')

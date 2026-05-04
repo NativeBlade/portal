@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/dev/tooling/cli/schema.json",
     "productName": "Nativeblade",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "identifier": "com.nativeblade.app",
     "build": {
         "beforeDevCommand": "npx vite --config vite.wasm.config.js",
