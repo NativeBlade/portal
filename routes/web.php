@@ -1,6 +1,10 @@
 <?php
 
-use App\Livewire\Portal;
+use App\Livewire\PortalAbout;
+use App\Livewire\PortalApps;
+use App\Livewire\PortalHome;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', Portal::class);
+Route::get('/', PortalHome::class);
+Route::get('/apps', PortalApps::class);
+Route::get('/about', PortalAbout::class);

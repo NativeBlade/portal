@@ -9,10 +9,9 @@ use NativeBlade\Facades\NativeBlade;
 use NativeBlade\Plugins\Scan;
 
 #[Layout('components.layouts.app')]
-class Portal extends Component
+class PortalHome extends Component
 {
-
-    public $canScan = false;
+    public bool $canScan = false;
 
     public function mount(): void
     {
@@ -21,27 +20,29 @@ class Portal extends Component
 
     public function scanQr()
     {
-        NativeBlade::log('scanQr triggered', ['ts' => now()->toString()]);
-
         return NativeBlade::scan(function (Scan $s) {
             $s->id('portal-url');
-            $s->formats(['QRCode']);
+            $s->formats(['QR_CODE']);
         })->toResponse();
     }
 
     #[On('nb:scan')]
     public function onScan($result = null, $id = null)
     {
-        if ($id !== 'portal-url' || !$result) return;
+        if ($id !== 'portal-url' || !$result) {
+            return;
+        }
 
         $content = $result['content'] ?? null;
-        if (!$content) return;
+        if (!$content) {
+            return;
+        }
 
         $this->dispatch('nb:portal-scanned', url: $content);
     }
 
     public function render()
     {
-        return view('livewire.portal');
+        return view('livewire.portal-home');
     }
 }

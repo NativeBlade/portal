@@ -9,11 +9,8 @@
     @livewireStyles
     <style>:root{--nb-safe-top:env(safe-area-inset-top,0px);--nb-safe-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen" style="padding-top: env(safe-area-inset-top)">
-
-    <main>
-        {{ $slot }}
-    </main>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    {{ $slot }}
 
     @livewireScripts
 

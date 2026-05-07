@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae8a84310cb03b77bef131dea37ea54d",
+    "content-hash": "0d5d1f935be175bc0c734c05d04a8727",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2311,16 +2311,16 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "v1.4.9",
+            "version": "v1.5.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/NativeBlade.git",
-                "reference": "5721c454765687f2aabf93cf9e657e1c7f11d44a"
+                "reference": "3f75ca3685fdd7ad08772b304d574224ff6d810e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/5721c454765687f2aabf93cf9e657e1c7f11d44a",
-                "reference": "5721c454765687f2aabf93cf9e657e1c7f11d44a",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/3f75ca3685fdd7ad08772b304d574224ff6d810e",
+                "reference": "3f75ca3685fdd7ad08772b304d574224ff6d810e",
                 "shasum": ""
             },
             "require": {
@@ -2359,9 +2359,81 @@
             "description": "Build desktop and mobile apps with Laravel + Livewire",
             "support": {
                 "issues": "https://github.com/NativeBlade/NativeBlade/issues",
-                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.4.9"
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v1.5.14"
             },
-            "time": "2026-05-04T20:45:41+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/NativeBlade",
+                    "type": "github"
+                },
+                {
+                    "url": "https://ko-fi.com/NativeBlade",
+                    "type": "ko_fi"
+                }
+            ],
+            "time": "2026-05-07T14:08:35+00:00"
+        },
+        {
+            "name": "nativeblade/ui-mobile",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/NativeBlade/ui-mobile.git",
+                "reference": "fa4ea70e75a7a0d2edcc60885895218b2fb4ed08"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/NativeBlade/ui-mobile/zipball/fa4ea70e75a7a0d2edcc60885895218b2fb4ed08",
+                "reference": "fa4ea70e75a7a0d2edcc60885895218b2fb4ed08",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0|^10.0",
+                "phpunit/phpunit": "^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "NativeBlade\\UiMobile\\UiMobileServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "NativeBlade\\UiMobile\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jefferson T.S",
+                    "email": "jeffleyd@gmail.com"
+                }
+            ],
+            "description": "Mobile UI components for NativeBlade. Konsta-style iOS and Material 3 Blade components that auto-switch theme based on the running platform.",
+            "keywords": [
+                "blade",
+                "ios",
+                "laravel",
+                "material",
+                "mobile",
+                "nativeblade",
+                "tailwind",
+                "ui"
+            ],
+            "support": {
+                "issues": "https://github.com/NativeBlade/ui-mobile/issues",
+                "source": "https://github.com/NativeBlade/ui-mobile/tree/v1.0.2"
+            },
+            "time": "2026-05-07T13:56:49+00:00"
         },
         {
             "name": "nesbot/carbon",
