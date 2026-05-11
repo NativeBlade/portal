@@ -19,7 +19,6 @@
         "clipboard-manager:allow-read-text",
         "clipboard-manager:allow-write-text",
         "upload:default",
-        "notification:default",
         "dialog:default",
         "opener:default",
         "store:default",

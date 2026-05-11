@@ -31,9 +31,6 @@ pub fn run() {
     #[cfg(feature = "upload")]
     let builder = builder.plugin(tauri_plugin_upload::init());
 
-    #[cfg(feature = "notification")]
-    let builder = builder.plugin(tauri_plugin_notification::init());
-
     #[cfg(feature = "http")]
     let builder = builder.plugin(tauri_plugin_http::init());
 
