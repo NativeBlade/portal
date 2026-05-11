@@ -2375,16 +2375,16 @@
         },
         {
             "name": "nativeblade/ui-mobile",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/ui-mobile.git",
-                "reference": "8e3b24485746112dd44927fec5fa24ea1e7be506"
+                "reference": "d1374486abb7957d471da3177bd0ebbddff22304"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/ui-mobile/zipball/8e3b24485746112dd44927fec5fa24ea1e7be506",
-                "reference": "8e3b24485746112dd44927fec5fa24ea1e7be506",
+                "url": "https://api.github.com/repos/NativeBlade/ui-mobile/zipball/d1374486abb7957d471da3177bd0ebbddff22304",
+                "reference": "d1374486abb7957d471da3177bd0ebbddff22304",
                 "shasum": ""
             },
             "require": {
@@ -2431,9 +2431,9 @@
             ],
             "support": {
                 "issues": "https://github.com/NativeBlade/ui-mobile/issues",
-                "source": "https://github.com/NativeBlade/ui-mobile/tree/v1.0.4"
+                "source": "https://github.com/NativeBlade/ui-mobile/tree/v1.0.5"
             },
-            "time": "2026-05-08T13:40:14+00:00"
+            "time": "2026-05-11T23:22:16+00:00"
         },
         {
             "name": "nesbot/carbon",
