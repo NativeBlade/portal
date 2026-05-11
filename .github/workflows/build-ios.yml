@@ -106,15 +106,24 @@ jobs:
         with:
           targets: aarch64-apple-ios
 
-      - name: Cache cargo
+      - name: Cache Composer
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            src-tauri/target
-          key: cargo-ios-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: cargo-ios-
+            ~/.composer/cache
+            vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Cache Cocoapods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+            src-tauri/gen/apple/Pods
+          key: cocoapods-${{ hashFiles('src-tauri/gen/apple/Podfile.lock') }}
+          restore-keys: cocoapods-
 
       - name: Install dependencies
         run: |
@@ -180,6 +189,17 @@ jobs:
 
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            src-tauri/target
+          key: cargo-ios-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: cargo-ios-
 
       - name: Write ExportOptions.plist
         env:
