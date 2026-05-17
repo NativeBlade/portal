@@ -35,9 +35,16 @@ jobs:
     timeout-minutes: 90
 
     steps:
+      # ─────────────────────────────────────────────────────────────
+      # 1. Checkout
+      # ─────────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ─────────────────────────────────────────────────────────────
+      # 2. Toolchains (PHP, Node, Rust + Linux system deps + JDK for
+      #    SSL.com CodeSignTool on Windows)
+      # ─────────────────────────────────────────────────────────────
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -90,6 +97,10 @@ jobs:
           if (-not $bat) { throw "CodeSignTool.bat not found after extraction" }
           "CODE_SIGN_TOOL_PATH=$($bat.DirectoryName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      # ─────────────────────────────────────────────────────────────
+      # 3. Caches (Composer — cargo cache comes after platform config
+      #    so it can hash the right Cargo.lock)
+      # ─────────────────────────────────────────────────────────────
       - name: Cache Composer
         uses: actions/cache@v4
         with:
@@ -99,7 +110,10 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      - name: Install dependencies
+      # ─────────────────────────────────────────────────────────────
+      # 4. Project dependencies + runtime env
+      # ─────────────────────────────────────────────────────────────
+      - name: Install PHP/JS dependencies
         run: |
           composer install --no-dev --prefer-dist --no-progress
           npm ci
@@ -116,20 +130,28 @@ jobs:
           fi
           php artisan key:generate --force || true
 
+      # ─────────────────────────────────────────────────────────────
+      # 5. Native config (regenerates Cargo.toml [features] etc.)
+      # ─────────────────────────────────────────────────────────────
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
 
-      - name: Cache cargo
-        uses: actions/cache@v4
+      # ─────────────────────────────────────────────────────────────
+      # 6. Cargo cache. Swatinem/rust-cache prunes stale target/ entries
+      #    so it stays under the 10GB actions/cache size limit between
+      #    runs, and hashes Cargo.{toml,lock} + rust-toolchain for keys.
+      # ─────────────────────────────────────────────────────────────
+      - name: Cache Cargo (registry + target)
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            src-tauri/target
-          key: cargo-desktop-${{ matrix.target }}-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: cargo-desktop-${{ matrix.target }}-
+          workspaces: src-tauri
+          key: desktop-${{ matrix.target }}
+          cache-on-failure: true
+          shared-key: portal-desktop-${{ matrix.target }}
 
+      # ─────────────────────────────────────────────────────────────
+      # 7. Signing setup (macOS only — Windows signs after build)
+      # ─────────────────────────────────────────────────────────────
       - name: Import Apple signing certificate
         if: matrix.target == 'macos' && env.APPLE_CERTIFICATE != ''
         env:
@@ -148,6 +170,9 @@ jobs:
             -A -t cert -f pkcs12 -k $RUNNER_TEMP/build.keychain
           security set-key-partition-list -S apple-tool:,apple: -s -k ci $RUNNER_TEMP/build.keychain
 
+      # ─────────────────────────────────────────────────────────────
+      # 8. Build
+      # ─────────────────────────────────────────────────────────────
       - name: Build Desktop
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
@@ -156,6 +181,9 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: php artisan nativeblade:build desktop
 
+      # ─────────────────────────────────────────────────────────────
+      # 9. Artifacts + post-build signing (Windows)
+      # ─────────────────────────────────────────────────────────────
       - name: Locate artifacts
         id: artifacts
         shell: bash
@@ -212,6 +240,9 @@ jobs:
           name: desktop-${{ matrix.target }}
           path: artifacts/*
 
+  # ─────────────────────────────────────────────────────────────────
+  # Aggregate job: pulls per-OS artifacts and ships them to S3
+  # ─────────────────────────────────────────────────────────────────
   upload-to-s3:
     needs: build
     runs-on: ubuntu-latest

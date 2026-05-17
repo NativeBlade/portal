@@ -15,11 +15,18 @@ jobs:
       JAVA_VERSION: '17'
       NODE_VERSION: '20'
       PHP_VERSION: '8.3'
+      NDK_VERSION: '26.1.10909125'
 
     steps:
+      # ─────────────────────────────────────────────────────────────
+      # 1. Checkout
+      # ─────────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ─────────────────────────────────────────────────────────────
+      # 2. Toolchains (JDK, Android SDK + NDK, PHP, Node, Rust)
+      # ─────────────────────────────────────────────────────────────
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -29,13 +36,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0 ndk;26.1.10909125'
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0 ndk;${{ env.NDK_VERSION }}'
 
       - name: Export NDK paths
         run: |
-          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
-          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -59,6 +66,10 @@ jobs:
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
+      # ─────────────────────────────────────────────────────────────
+      # 3. Caches (Composer, Gradle — cargo cache comes after platform
+      #    scaffolding so it can hash the right Cargo.lock)
+      # ─────────────────────────────────────────────────────────────
       - name: Cache Composer
         uses: actions/cache@v4
         with:
@@ -79,7 +90,10 @@ jobs:
             gradle-android-
             gradle-
 
-      - name: Install dependencies
+      # ─────────────────────────────────────────────────────────────
+      # 4. Project dependencies + runtime env
+      # ─────────────────────────────────────────────────────────────
+      - name: Install PHP/JS dependencies
         run: |
           composer install --no-dev --prefer-dist --no-progress
           npm ci
@@ -95,23 +109,31 @@ jobs:
           fi
           php artisan key:generate --force || true
 
+      # ─────────────────────────────────────────────────────────────
+      # 5. Native scaffolding (creates src-tauri/gen/android + locks)
+      # ─────────────────────────────────────────────────────────────
       - name: Add Android platform
         run: php artisan nativeblade:add android
 
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
 
-      - name: Cache cargo
-        uses: actions/cache@v4
+      # ─────────────────────────────────────────────────────────────
+      # 6. Cargo cache. Swatinem/rust-cache prunes stale target/ entries
+      #    so it stays under the 10GB actions/cache size limit between
+      #    runs, and hashes Cargo.{toml,lock} + rust-toolchain for keys.
+      # ─────────────────────────────────────────────────────────────
+      - name: Cache Cargo (registry + target)
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            src-tauri/target
-          key: cargo-android-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: cargo-android-
+          workspaces: src-tauri
+          key: android
+          cache-on-failure: true
+          shared-key: portal-android
 
+      # ─────────────────────────────────────────────────────────────
+      # 7. Signing
+      # ─────────────────────────────────────────────────────────────
       - name: Decode keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -137,9 +159,15 @@ jobs:
             --key-password="$KEYPASS" \
             --alias="$ALIAS"
 
+      # ─────────────────────────────────────────────────────────────
+      # 8. Build
+      # ─────────────────────────────────────────────────────────────
       - name: Build Android
         run: php artisan nativeblade:build android
 
+      # ─────────────────────────────────────────────────────────────
+      # 9. Artifacts
+      # ─────────────────────────────────────────────────────────────
       - name: Locate artifacts
         id: artifacts
         run: |

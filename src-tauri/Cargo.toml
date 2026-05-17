@@ -75,5 +75,5 @@ upload = ["dep:tauri-plugin-upload"]
 # nativeblade:plugins:end
 
 [profile.release]
-debug = "limited"
+debug = "line-tables-only"
 strip = false

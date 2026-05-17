@@ -16,10 +16,20 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
 
+    env:
+      NODE_VERSION: '20'
+      PHP_VERSION: '8.3'
+
     steps:
+      # ─────────────────────────────────────────────────────────────
+      # 1. Checkout
+      # ─────────────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ─────────────────────────────────────────────────────────────
+      # 2. Xcode selection (must be stable, not Beta — App Store rejects)
+      # ─────────────────────────────────────────────────────────────
       - name: Select stable Xcode 26 (App Store rejects beta builds)
         run: |
           # Returns "Beta" if the Xcode at $1 is a beta build, "GM" otherwise.
@@ -84,10 +94,13 @@ jobs:
           sudo xcode-select -s "$SELECTED/Contents/Developer"
           xcodebuild -version
 
+      # ─────────────────────────────────────────────────────────────
+      # 3. Toolchains (PHP, Node, Rust)
+      # ─────────────────────────────────────────────────────────────
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, intl, dom, fileinfo, sqlite3, pdo_sqlite, gd
           coverage: none
           tools: composer:v2
@@ -98,7 +111,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - name: Setup Rust
@@ -106,6 +119,10 @@ jobs:
         with:
           targets: aarch64-apple-ios
 
+      # ─────────────────────────────────────────────────────────────
+      # 4. Caches (Composer, CocoaPods — cargo cache comes after platform
+      #    scaffolding so it can hash the right Cargo.lock)
+      # ─────────────────────────────────────────────────────────────
       - name: Cache Composer
         uses: actions/cache@v4
         with:
@@ -115,7 +132,7 @@ jobs:
           key: composer-${{ hashFiles('composer.lock') }}
           restore-keys: composer-
 
-      - name: Cache Cocoapods
+      - name: Cache CocoaPods
         uses: actions/cache@v4
         with:
           path: |
@@ -125,7 +142,10 @@ jobs:
           key: cocoapods-${{ hashFiles('src-tauri/gen/apple/Podfile.lock') }}
           restore-keys: cocoapods-
 
-      - name: Install dependencies
+      # ─────────────────────────────────────────────────────────────
+      # 5. Project dependencies + runtime env
+      # ─────────────────────────────────────────────────────────────
+      - name: Install PHP/JS dependencies
         run: |
           composer install --no-dev --prefer-dist --no-progress
           npm ci
@@ -141,6 +161,9 @@ jobs:
           fi
           php artisan key:generate --force || true
 
+      # ─────────────────────────────────────────────────────────────
+      # 6. Signing setup (keychain + provisioning profile)
+      # ─────────────────────────────────────────────────────────────
       - name: Decode signing certificate
         env:
           IOS_DIST_CERT_BASE64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
@@ -184,30 +207,36 @@ jobs:
 
           echo "Installed profile: $PROFILE_NAME ($PROFILE_UUID)"
 
+      # ─────────────────────────────────────────────────────────────
+      # 7. Native scaffolding (creates src-tauri/gen/apple + locks)
+      # ─────────────────────────────────────────────────────────────
       - name: Add iOS platform
         run: php artisan nativeblade:add ios
 
       - name: Configure NativeBlade
         run: php artisan nativeblade:config
 
-      - name: Cache cargo
-        uses: actions/cache@v4
+      # ─────────────────────────────────────────────────────────────
+      # 8. Cargo cache. Swatinem/rust-cache prunes stale target/ entries
+      #    so it stays under the 10GB actions/cache size limit between
+      #    runs, and hashes Cargo.{toml,lock} + rust-toolchain for keys.
+      # ─────────────────────────────────────────────────────────────
+      - name: Cache Cargo (registry + target)
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            src-tauri/target
-          key: cargo-ios-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: cargo-ios-
+          workspaces: src-tauri
+          key: ios
+          cache-on-failure: true
+          shared-key: portal-ios
 
+      # ─────────────────────────────────────────────────────────────
+      # 9. Xcode project patching for manual signing
+      # ─────────────────────────────────────────────────────────────
       - name: Write ExportOptions.plist
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           PROFILE_NAME: ${{ steps.profile.outputs.name }}
         run: |
-          APPLE_DIR=$(find src-tauri/gen/apple -maxdepth 1 -type d -name "*.xcodeproj" -prune -o -type d -print | head -n 2 | tail -n 1)
-          # actually just use src-tauri/gen/apple as the directory
           APPLE_DIR=src-tauri/gen/apple
 
           cat > "$APPLE_DIR/ExportOptions.plist" <<EOF
@@ -269,6 +298,9 @@ jobs:
           puts "Patched #{project.targets.size} target(s) for manual signing"
           RUBY
 
+      # ─────────────────────────────────────────────────────────────
+      # 10. Sanity checks + Xcode 26 workaround
+      # ─────────────────────────────────────────────────────────────
       - name: Verify iOS device SDK is present
         run: |
           echo "=== iOS SDKs available ==="
@@ -315,13 +347,18 @@ jobs:
           echo "$HOME/.xcshim" >> "$GITHUB_PATH"
           echo "Shim installed → $HOME/.xcshim/xcodebuild"
 
+      # ─────────────────────────────────────────────────────────────
+      # 11. Build
+      # ─────────────────────────────────────────────────────────────
       - name: Build iOS
         env:
           APPLE_DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          php artisan nativeblade:build ios
+        run: php artisan nativeblade:build ios
 
+      # ─────────────────────────────────────────────────────────────
+      # 12. Artifacts + optional TestFlight upload
+      # ─────────────────────────────────────────────────────────────
       - name: Locate IPA
         id: ipa
         run: |
@@ -353,6 +390,9 @@ jobs:
             --password "$APPLE_APP_PASSWORD" \
             --verbose
 
+      # ─────────────────────────────────────────────────────────────
+      # 13. Cleanup
+      # ─────────────────────────────────────────────────────────────
       - name: Cleanup keychain
         if: always()
         run: |
