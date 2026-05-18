@@ -10,8 +10,8 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.3",
-        "nativeblade/nativeblade": "^1.4.1",
-        "nativeblade/ui-mobile": "^1.0"
+        "nativeblade/nativeblade": "*",
+        "nativeblade/ui-mobile": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

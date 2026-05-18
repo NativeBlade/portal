@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "nativeblade": {
+            "command": "php",
+            "args": ["artisan", "nativeblade:mcp"]
+        }
+    }
+}
