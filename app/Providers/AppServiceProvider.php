@@ -12,8 +12,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.0.17';
-    const VERSION_NUMBER = 18;
+    CONST VERSION = '1.0.18';
+    const VERSION_NUMBER = 19;
 
     public function register(): void
     {
@@ -46,8 +46,7 @@ class AppServiceProvider extends ServiceProvider
                 ->minSdk(28)
                 ->targetSdk(35)
                 ->orientation('portrait')
-                ->statusBar(style: 'dark', color: '#0a0a0a')
-                ->navigationBar('#0a0a0a')
+                ->statusBar(style: 'dark')
                 ->splashBackground('#0a0a0a')
                 ->permissions([
                     Permission::CAMERA => 'Loaded apps may use the camera. Permission is requested only when an app actively invokes it.',
