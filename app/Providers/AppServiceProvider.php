@@ -12,8 +12,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.0.18';
-    const VERSION_NUMBER = 19;
+    CONST VERSION = '1.0.19';
+    const VERSION_NUMBER = 20;
 
     public function register(): void
     {
@@ -28,9 +28,10 @@ class AppServiceProvider extends ServiceProvider
         // below is reviewed by Apple, so we explain the portal nature
         // explicitly in each one.
 
+        NativeBladeConfig::name('Nativeblade');
+
         NativeBladeConfig::desktop(function (DesktopConfig $config) {
-            $config->title('Nativeblade')
-                ->identifier('com.nativeblade.app')
+            $config->identifier('com.nativeblade.app')
                 ->version(self::VERSION, self::VERSION_NUMBER)
                 ->size(1200, 800)
                 ->icon('src-tauri/icons/logo.png')
