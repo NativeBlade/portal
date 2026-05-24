@@ -12,8 +12,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.0.21';
-    const VERSION_NUMBER = 22;
+    CONST VERSION = '1.0.22';
+    const VERSION_NUMBER = 23;
 
     public function register(): void
     {
@@ -27,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
         // can call any NativeBlade API. Trade-off: every permission text
         // below is reviewed by Apple, so we explain the portal nature
         // explicitly in each one.
+
+        NativeBladeConfig::bundlePush(
+            url: 'https://nativeblade.github.io/portal-updates/version.json',
+        );
 
         NativeBladeConfig::name('Nativeblade');
 
