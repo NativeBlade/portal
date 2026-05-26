@@ -12,8 +12,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.0.22';
-    const VERSION_NUMBER = 23;
+    CONST VERSION = '1.0.23';
+    const VERSION_NUMBER = 24;
 
     public function register(): void
     {
@@ -93,6 +93,6 @@ class AppServiceProvider extends ServiceProvider
                 ]);
         });
 
-        NativeBladeConfig::transition('slide');
+        NativeBladeConfig::transition('none');
     }
 }

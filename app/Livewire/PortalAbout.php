@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Providers\AppServiceProvider;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use NativeBlade\Facades\NativeBlade;
@@ -15,7 +16,7 @@ class PortalAbout extends Component
     public function mount(): void
     {
         $this->platform = NativeBlade::platform();
-        $this->version = config('app.version', '1.0.0');
+        $this->version = AppServiceProvider::VERSION;
     }
 
     public function render()

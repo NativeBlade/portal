@@ -477,10 +477,9 @@
             var ctrl = new AbortController();
             var timer = setTimeout(function () { ctrl.abort(); }, PING_TIMEOUT_MS);
             try {
-                // no-cors so we don't need CORS headers; opaque response
-                // is fine — we only care that the connection succeeded.
-                await fetch(url + '/?_nbping=' + Date.now(), {
-                    method: 'GET',
+                var bundleUrl = url.replace(/\/$/, '') + '/laravel-bundle.json.gz';
+                await fetch(bundleUrl, {
+                    method: 'HEAD',
                     mode: 'no-cors',
                     cache: 'no-store',
                     signal: ctrl.signal,
