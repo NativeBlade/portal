@@ -16,8 +16,8 @@
         "axios": ">=1.11.0 <=1.14.0"
     },
     "dependencies": {
-        "@php-wasm/universal": "^3.1.15",
-        "@php-wasm/web-8-3": "^3.1.15",
+        "@php-wasm/universal": "^3.1.35",
+        "@php-wasm/web-8-3": "^3.1.35",
         "@tauri-apps/api": "^2",
         "@tauri-apps/cli": "^2",
         "@tauri-apps/plugin-barcode-scanner": "^2",
