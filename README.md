@@ -3,11 +3,16 @@
 </p>
 
 <p align="center">
-  Test your NativeBlade apps on a real device — without ever installing the toolchain on it.
+  Test your NativeBlade apps on a real device, without ever installing the toolchain on it.
 </p>
 
 <p align="center">
   <em>Like Expo Go, but for Laravel.</em>
+</p>
+
+<p align="center">
+  <a href="https://apps.apple.com/us/app/nativeblade/id6765935943"><img alt="Download on the App Store" src="https://img.shields.io/badge/App%20Store-Download-0a84ff?logo=apple&logoColor=white"></a>
+  <a href="https://play.google.com/store/apps/details?id=com.nativeblade.app"><img alt="Get it on Google Play" src="https://img.shields.io/badge/Google%20Play-Download-689f38?logo=googleplay&logoColor=white"></a>
 </p>
 
 ---
@@ -48,9 +53,9 @@ The Portal has every plugin pre-bundled, so anything your app does (`NativeBlade
 
 | Platform | How |
 |----------|-----|
-| **Android** | [Play Store](#) (or sideload the APK from Releases) |
-| **iOS** | [TestFlight](#) (App Store coming) |
-| **Desktop** | [Releases](https://github.com/nativeblade/portal/releases) — `.msi`, `.dmg`, `.AppImage` |
+| **iOS** | [App Store](https://apps.apple.com/us/app/nativeblade/id6765935943) |
+| **Android** | [Google Play](https://play.google.com/store/apps/details?id=com.nativeblade.app) |
+| **Desktop** | [Releases](https://github.com/nativeblade/portal/releases) (`.msi`, `.dmg`, `.AppImage`) |
 
 ## Using the Portal — for app developers
 
