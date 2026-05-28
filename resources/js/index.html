@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nativeblade</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -345,6 +345,12 @@
         var saved = localStorage.getItem('nb:bundleBase');
         if (saved) window.__NB_BUNDLE_BASE__ = saved;
     } catch (e) {}
+
+    // iOS WKWebView ignores user-scalable=no in some versions; block the
+    // pinch gesture directly so the app cannot zoom.
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (evt) {
+        document.addEventListener(evt, function (e) { e.preventDefault(); }, { passive: false });
+    });
 
     // Escape hatch: Shift+Esc anywhere clears the remote bundle URL and
     // reloads, dropping the user back into the "Connect" screen shipped
