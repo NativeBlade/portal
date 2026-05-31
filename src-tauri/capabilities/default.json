@@ -34,7 +34,13 @@
         "fs:allow-read-dir",
         "fs:allow-read-file",
         "fs:allow-write-file",
-        "http:default",
+        {
+            "identifier": "http:default",
+            "allow": [
+                { "url": "http://*" },
+                { "url": "https://*" }
+            ]
+        },
         "deep-link:default",
         "os:default",
         "process:default",
