@@ -275,6 +275,101 @@
             overflow: auto;
         }
         .nb-error-stack:empty { display: none; }
+
+        /* Console viewer */
+        #nb-console-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2147483646;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        #nb-console-overlay[hidden] { display: none !important; }
+        .nb-console-dialog {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            flex: 1;
+            min-height: 0;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .nb-console-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: #111;
+            border-bottom: 1px solid #1f1f1f;
+        }
+        .nb-console-title {
+            color: #d4d4d4;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .nb-console-list {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            padding: 8px 0;
+        }
+        .nb-console-row {
+            display: flex;
+            gap: 8px;
+            padding: 5px 14px;
+            font-size: 11px;
+            line-height: 1.5;
+            border-bottom: 1px solid #141414;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .nb-console-row .lvl {
+            flex-shrink: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 9px;
+            padding-top: 1px;
+            min-width: 42px;
+        }
+        .nb-console-row .msg { flex: 1; color: #cbd5e1; }
+        .nb-console-row.error .lvl { color: #fca5a5; }
+        .nb-console-row.error .msg { color: #fca5a5; }
+        .nb-console-row.warn  .lvl { color: #fcd34d; }
+        .nb-console-row.warn  .msg { color: #fcd34d; }
+        .nb-console-row.info  .lvl { color: #93c5fd; }
+        .nb-console-row.debug .lvl { color: #6b7280; }
+        .nb-console-row.debug .msg { color: #9ca3af; }
+        .nb-console-row.log   .lvl { color: #6b7280; }
+        .nb-console-empty {
+            padding: 24px 14px;
+            color: #6b7280;
+            font-size: 12px;
+            text-align: center;
+        }
+        .nb-console-badge {
+            display: none;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 8px;
+            background: #c0392b;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+        }
+        .nb-shell-btn .nb-console-badge.show { display: inline-flex; }
     </style>
 </head>
 <body>
@@ -304,6 +399,11 @@
         <button type="button" class="nb-shell-btn" id="nb-shell-reload">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
             Reload
+        </button>
+        <button type="button" class="nb-shell-btn" id="nb-shell-console">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            Console
+            <span class="nb-console-badge" id="nb-console-badge">0</span>
         </button>
         <button type="button" class="nb-shell-btn" id="nb-shell-hide">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -335,6 +435,23 @@
             <div class="nb-error-source" id="nb-error-source"></div>
             <pre class="nb-error-stack" id="nb-error-stack"></pre>
         </div>
+    </div>
+</div>
+
+<!-- Console viewer overlay -->
+<div id="nb-console-overlay" hidden>
+    <div class="nb-console-dialog" role="dialog" aria-label="Console">
+        <header class="nb-console-head">
+            <span class="nb-console-title">Console</span>
+            <span class="nb-error-spacer"></span>
+            <button type="button" class="nb-error-close" id="nb-console-clear" aria-label="Clear" title="Clear">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+            <button type="button" class="nb-error-close" id="nb-console-close" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            </button>
+        </header>
+        <div class="nb-console-list" id="nb-console-list"></div>
     </div>
 </div>
 
@@ -386,8 +503,21 @@
         var errStackEl = document.getElementById('nb-error-stack');
         var errCloseBtn = document.getElementById('nb-error-close');
 
+        var consoleBtn = document.getElementById('nb-shell-console');
+        var consoleBadge = document.getElementById('nb-console-badge');
+        var consoleOverlay = document.getElementById('nb-console-overlay');
+        var consoleList = document.getElementById('nb-console-list');
+        var consoleCloseBtn = document.getElementById('nb-console-close');
+        var consoleClearBtn = document.getElementById('nb-console-clear');
+
         var seenKeys = Object.create(null);
         var inErrorCapture = false;
+
+        // Console buffer — every console.* call (any frame) lands here so the
+        // viewer can show a full log on-device. Capped to keep memory bounded.
+        var LOG_CAP = 500;
+        var logs = [];
+        var unseenLogs = 0;
 
         function readBundle() {
             try { return localStorage.getItem('nb:bundleBase'); }
@@ -484,9 +614,12 @@
             var timer = setTimeout(function () { ctrl.abort(); }, PING_TIMEOUT_MS);
             try {
                 var bundleUrl = url.replace(/\/$/, '') + '/laravel-bundle.json.gz';
-                await fetch(bundleUrl, {
+                // http:// is blocked by the WebView in the packaged app; use
+                // the native HTTP plugin for it, plain fetch otherwise.
+                var useNative = /^http:\/\//i.test(bundleUrl) && window.__TAURI__ && window.__TAURI__.http;
+                var doFetch = useNative ? window.__TAURI__.http.fetch : fetch;
+                await doFetch(bundleUrl, {
                     method: 'HEAD',
-                    mode: 'no-cors',
                     cache: 'no-store',
                     signal: ctrl.signal,
                 });
@@ -562,8 +695,69 @@
             });
         }
 
+        function addLog(level, args, inIframe) {
+            var msg = Array.prototype.map.call(args, fmtArg).join(' ');
+            if (!msg) return;
+            logs.push({ level: level, msg: msg, app: !!inIframe });
+            if (logs.length > LOG_CAP) logs.shift();
+            if (consoleOverlay.hidden) {
+                unseenLogs++;
+                updateBadge();
+            } else {
+                renderConsole();
+            }
+        }
+
+        function updateBadge() {
+            if (unseenLogs > 0) {
+                consoleBadge.textContent = unseenLogs > 99 ? '99+' : String(unseenLogs);
+                consoleBadge.classList.add('show');
+            } else {
+                consoleBadge.classList.remove('show');
+            }
+        }
+
+        function renderConsole() {
+            if (!logs.length) {
+                consoleList.innerHTML = '<div class="nb-console-empty">No console output yet.</div>';
+                return;
+            }
+            var frag = document.createDocumentFragment();
+            for (var i = 0; i < logs.length; i++) {
+                var e = logs[i];
+                var row = document.createElement('div');
+                row.className = 'nb-console-row ' + e.level;
+                var lvl = document.createElement('span');
+                lvl.className = 'lvl';
+                lvl.textContent = e.app ? e.level + '·app' : e.level;
+                var msg = document.createElement('span');
+                msg.className = 'msg';
+                msg.textContent = e.msg;
+                row.appendChild(lvl);
+                row.appendChild(msg);
+                frag.appendChild(row);
+            }
+            consoleList.innerHTML = '';
+            consoleList.appendChild(frag);
+            consoleList.scrollTop = consoleList.scrollHeight;
+        }
+
+        function openConsole() {
+            unseenLogs = 0;
+            updateBadge();
+            renderConsole();
+            consoleOverlay.hidden = false;
+            toggleMenu(false);
+        }
+        function closeConsole() { consoleOverlay.hidden = true; }
+        function clearConsole() { logs = []; unseenLogs = 0; updateBadge(); renderConsole(); }
+
+        var LOG_LEVELS = ['log', 'info', 'warn', 'debug', 'error'];
+
         function hookWindow(win, inIframe) {
             try {
+                if (!win || win.__nbErrorHooked) return;
+                win.__nbErrorHooked = true;
                 win.addEventListener('error', function (e) {
                     addError({
                         type: inIframe ? 'iframe-error' : 'error',
@@ -581,12 +775,20 @@
                         source: '',
                     });
                 });
-                var orig = win.console && win.console.error;
-                if (orig && !win.console.__nbHooked) {
-                    win.console.error = function () {
-                        try { captureFromConsole(arguments, inIframe ? 'iframe-console' : 'console'); } catch (_) {}
-                        return orig.apply(win.console, arguments);
-                    };
+                // Mirror every console level into the buffer; console.error
+                // additionally pops the error modal (existing behavior).
+                if (win.console && !win.console.__nbHooked) {
+                    LOG_LEVELS.forEach(function (level) {
+                        var orig = win.console[level];
+                        if (typeof orig !== 'function') return;
+                        win.console[level] = function () {
+                            try { addLog(level, arguments, inIframe); } catch (_) {}
+                            if (level === 'error') {
+                                try { captureFromConsole(arguments, inIframe ? 'iframe-console' : 'console'); } catch (_) {}
+                            }
+                            return orig.apply(win.console, arguments);
+                        };
+                    });
                     win.console.__nbHooked = true;
                 }
             } catch (e) {}
@@ -594,12 +796,29 @@
 
         hookWindow(window, false);
 
-        var iframe = document.getElementById('app');
-        if (iframe) {
-            iframe.addEventListener('load', function () {
-                try { hookWindow(iframe.contentWindow, true); } catch (e) {}
+        // The router swaps between two iframes (#app and a buffer frame it
+        // creates dynamically), so hooking #app alone misses errors in the
+        // frame that becomes active after a navigation. Hook every iframe that
+        // appears, and re-hook on each load since srcdoc reload makes a new
+        // contentWindow.
+        function hookFrame(frame) {
+            try { hookWindow(frame.contentWindow, true); } catch (e) {}
+            if (frame.__nbLoadHooked) return;
+            frame.__nbLoadHooked = true;
+            frame.addEventListener('load', function () {
+                try { hookWindow(frame.contentWindow, true); } catch (e) {}
             });
         }
+        function hookAllFrames() {
+            document.querySelectorAll('iframe').forEach(hookFrame);
+        }
+        hookAllFrames();
+        try {
+            new MutationObserver(hookAllFrames).observe(document.documentElement, {
+                childList: true,
+                subtree: true,
+            });
+        } catch (e) {}
 
         // ----- Wiring -----
 
@@ -628,7 +847,14 @@
         });
 
         errCloseBtn.addEventListener('click', closeOverlay);
+        consoleBtn.addEventListener('click', openConsole);
+        consoleCloseBtn.addEventListener('click', closeConsole);
+        consoleClearBtn.addEventListener('click', clearConsole);
         window.addEventListener('keydown', function (e) {
+            if (!consoleOverlay.hidden && e.key === 'Escape' && !e.shiftKey) {
+                closeConsole();
+                return;
+            }
             if (!overlay.hidden && e.key === 'Escape' && !e.shiftKey) {
                 closeOverlay();
                 return;
