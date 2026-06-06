@@ -10,6 +10,18 @@ pub fn run() {
     #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "push"))]
     let builder = builder.plugin(tauri_plugin_nativeblade_push::init());
 
+    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "in_app_review"))]
+    let builder = builder.plugin(tauri_plugin_nativeblade_review::init());
+
+    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "secure_storage"))]
+    let builder = builder.plugin(tauri_plugin_nativeblade_secure_storage::init());
+
+    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "sharing"))]
+    let builder = builder.plugin(tauri_plugin_nativeblade_sharing::init());
+
+    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "analytics"))]
+    let builder = builder.plugin(tauri_plugin_nativeblade_analytics::init());
+
     #[cfg(feature = "geolocation")]
     let builder = builder.plugin(tauri_plugin_geolocation::init());
 

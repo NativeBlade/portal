@@ -2360,27 +2360,27 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "v2.3.1",
+            "version": "v2.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/NativeBlade.git",
-                "reference": "ea45aca0299549929979f210dd788ef4420fead3"
+                "reference": "37a9845feec595b99485a5dab6744e1bdcc4ccde"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/ea45aca0299549929979f210dd788ef4420fead3",
-                "reference": "ea45aca0299549929979f210dd788ef4420fead3",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/37a9845feec595b99485a5dab6744e1bdcc4ccde",
+                "reference": "37a9845feec595b99485a5dab6744e1bdcc4ccde",
                 "shasum": ""
             },
             "require": {
                 "bacon/bacon-qr-code": "^3.0",
-                "laravel/framework": "^11.0|^12.0|^13.0",
+                "laravel/framework": "^12.0|^13.0",
                 "php": "8.3.*|8.4.*|8.5.*",
                 "phpdocumentor/reflection-docblock": "^6.0"
             },
             "require-dev": {
                 "livewire/livewire": "^3.0|^4.0",
-                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "orchestra/testbench": "^10.0|^11.0",
                 "phpunit/phpunit": "^11.0|^12.0"
             },
             "type": "library",
@@ -2409,19 +2409,19 @@
             "description": "Build desktop and mobile apps with Laravel + Livewire",
             "support": {
                 "issues": "https://github.com/NativeBlade/NativeBlade/issues",
-                "source": "https://github.com/NativeBlade/NativeBlade/tree/v2.3.1"
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v2.4.6"
             },
             "funding": [
                 {
-                    "url": "https://github.com/NativeBlade",
-                    "type": "github"
+                    "url": "https://github.com/NativeBlade/NativeBlade/blob/main/SPONSORS.md",
+                    "type": "custom"
                 },
                 {
-                    "url": "https://ko-fi.com/NativeBlade",
-                    "type": "ko_fi"
+                    "url": "https://polar.sh/NativeBlade",
+                    "type": "polar"
                 }
             ],
-            "time": "2026-05-31T15:18:03+00:00"
+            "time": "2026-06-06T15:37:25+00:00"
         },
         {
             "name": "nativeblade/ui-mobile",

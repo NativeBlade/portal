@@ -55,11 +55,16 @@ tauri-plugin-barcode-scanner = { version = "2", optional = true }
 tauri-plugin-nfc = { version = "2", optional = true }
 tauri-plugin-nativeblade-push = { path = "../vendor/nativeblade/nativeblade/rust/plugins/push", optional = true }
 tauri-plugin-nativeblade-media = { path = "../vendor/nativeblade/nativeblade/rust/plugins/media", optional = true }
+tauri-plugin-nativeblade-review = { path = "../vendor/nativeblade/nativeblade/rust/plugins/review", optional = true }
+tauri-plugin-nativeblade-secure-storage = { path = "../vendor/nativeblade/nativeblade/rust/plugins/secure-storage", optional = true }
+tauri-plugin-nativeblade-sharing = { path = "../vendor/nativeblade/nativeblade/rust/plugins/sharing", optional = true }
+tauri-plugin-nativeblade-analytics = { path = "../vendor/nativeblade/nativeblade/rust/plugins/analytics", optional = true }
 
 # nativeblade:plugins:start
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
+analytics = ["dep:tauri-plugin-nativeblade-analytics"]
 barcode_scanner = ["dep:tauri-plugin-barcode-scanner"]
 biometric = ["dep:tauri-plugin-biometric"]
 clipboard = ["dep:tauri-plugin-clipboard-manager"]
@@ -67,9 +72,12 @@ deep_link = ["dep:tauri-plugin-deep-link"]
 geolocation = ["dep:tauri-plugin-geolocation"]
 haptics = ["dep:tauri-plugin-haptics"]
 http = ["dep:tauri-plugin-http"]
+in_app_review = ["dep:tauri-plugin-nativeblade-review"]
 media = ["dep:tauri-plugin-nativeblade-media"]
 nfc = ["dep:tauri-plugin-nfc"]
 push = ["dep:tauri-plugin-nativeblade-push"]
+secure_storage = ["dep:tauri-plugin-nativeblade-secure-storage"]
+sharing = ["dep:tauri-plugin-nativeblade-sharing"]
 shell = ["dep:tauri-plugin-shell"]
 upload = ["dep:tauri-plugin-upload"]
 # nativeblade:plugins:end
