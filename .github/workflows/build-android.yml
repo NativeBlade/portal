@@ -64,7 +64,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi
 
       # ─────────────────────────────────────────────────────────────
       # 3. Caches (Composer, Gradle — cargo cache comes after platform
@@ -163,7 +163,7 @@ jobs:
       # 8. Build
       # ─────────────────────────────────────────────────────────────
       - name: Build Android
-        run: php artisan nativeblade:build android
+        run: php artisan nativeblade:build android --targets=aarch64,armv7
 
       # ─────────────────────────────────────────────────────────────
       # 9. Artifacts
