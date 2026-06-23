@@ -7,13 +7,14 @@ use NativeBlade\Config\AndroidConfig;
 use NativeBlade\Config\DesktopConfig;
 use NativeBlade\Config\IosConfig;
 use NativeBlade\Config\Permission;
+use NativeBlade\Config\Plugin;
 use NativeBlade\Config\PrivacyApi;
 use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.6.0';
-    const VERSION_NUMBER = 1006000;
+    CONST VERSION = '1.7.0';
+    const VERSION_NUMBER = 1007000;
 
     public function register(): void
     {
@@ -92,6 +93,23 @@ class AppServiceProvider extends ServiceProvider
                     PrivacyApi::DISK_SPACE => PrivacyApi::DISK_SPACE_WRITE_CHECK,
                 ]);
         });
+
+        NativeBladeConfig::plugins([
+            Plugin::MEDIA,
+            Plugin::PUSH,
+            Plugin::IN_APP_REVIEW,
+            Plugin::SECURE_STORAGE,
+            Plugin::SHARING,
+            Plugin::GEOLOCATION,
+            Plugin::BIOMETRIC,
+            Plugin::BARCODE_SCANNER,
+            Plugin::NFC,
+            Plugin::HAPTICS,
+            Plugin::CLIPBOARD,
+            Plugin::HTTP,
+            Plugin::UPLOAD,
+            Plugin::DEEP_LINK,
+        ]);
 
         NativeBladeConfig::transition('none');
     }

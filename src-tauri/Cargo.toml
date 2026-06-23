@@ -64,7 +64,6 @@ tauri-plugin-nativeblade-analytics = { path = "../vendor/nativeblade/nativeblade
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
-analytics = ["dep:tauri-plugin-nativeblade-analytics"]
 barcode_scanner = ["dep:tauri-plugin-barcode-scanner"]
 biometric = ["dep:tauri-plugin-biometric"]
 clipboard = ["dep:tauri-plugin-clipboard-manager"]
@@ -78,7 +77,6 @@ nfc = ["dep:tauri-plugin-nfc"]
 push = ["dep:tauri-plugin-nativeblade-push"]
 secure_storage = ["dep:tauri-plugin-nativeblade-secure-storage"]
 sharing = ["dep:tauri-plugin-nativeblade-sharing"]
-shell = ["dep:tauri-plugin-shell"]
 upload = ["dep:tauri-plugin-upload"]
 # nativeblade:plugins:end
 

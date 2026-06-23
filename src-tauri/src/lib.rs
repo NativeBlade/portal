@@ -19,9 +19,6 @@ pub fn run() {
     #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "sharing"))]
     let builder = builder.plugin(tauri_plugin_nativeblade_sharing::init());
 
-    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "analytics"))]
-    let builder = builder.plugin(tauri_plugin_nativeblade_analytics::init());
-
     #[cfg(feature = "geolocation")]
     let builder = builder.plugin(tauri_plugin_geolocation::init());
 
@@ -40,17 +37,14 @@ pub fn run() {
     #[cfg(feature = "clipboard")]
     let builder = builder.plugin(tauri_plugin_clipboard_manager::init());
 
-    #[cfg(feature = "upload")]
-    let builder = builder.plugin(tauri_plugin_upload::init());
-
     #[cfg(feature = "http")]
     let builder = builder.plugin(tauri_plugin_http::init());
 
+    #[cfg(feature = "upload")]
+    let builder = builder.plugin(tauri_plugin_upload::init());
+
     #[cfg(feature = "deep_link")]
     let builder = builder.plugin(tauri_plugin_deep_link::init());
-
-    #[cfg(feature = "shell")]
-    let builder = builder.plugin(tauri_plugin_shell::init());
     // nativeblade:plugins:end
 
     builder

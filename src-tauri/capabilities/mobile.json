@@ -14,7 +14,6 @@
         "nativeblade-review:default",
         "nativeblade-secure-storage:default",
         "nativeblade-sharing:default",
-        "nativeblade-analytics:default",
         "biometric:default",
         "barcode-scanner:allow-scan",
         "barcode-scanner:allow-cancel",
