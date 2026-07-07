@@ -2360,16 +2360,16 @@
         },
         {
             "name": "nativeblade/nativeblade",
-            "version": "v3.2.1",
+            "version": "v3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/NativeBlade/NativeBlade.git",
-                "reference": "fb1438729ac83918b08a604776fc549f3df6ac02"
+                "reference": "7bb730de236d608cbcfa54c07f057141c07b127f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/fb1438729ac83918b08a604776fc549f3df6ac02",
-                "reference": "fb1438729ac83918b08a604776fc549f3df6ac02",
+                "url": "https://api.github.com/repos/NativeBlade/NativeBlade/zipball/7bb730de236d608cbcfa54c07f057141c07b127f",
+                "reference": "7bb730de236d608cbcfa54c07f057141c07b127f",
                 "shasum": ""
             },
             "require": {
@@ -2409,7 +2409,7 @@
             "description": "Build desktop and mobile apps with Laravel + Livewire",
             "support": {
                 "issues": "https://github.com/NativeBlade/NativeBlade/issues",
-                "source": "https://github.com/NativeBlade/NativeBlade/tree/v3.2.1"
+                "source": "https://github.com/NativeBlade/NativeBlade/tree/v3.2.2"
             },
             "funding": [
                 {
@@ -2417,7 +2417,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-07-07T14:51:12+00:00"
+            "time": "2026-07-07T16:57:02+00:00"
         },
         {
             "name": "nativeblade/ui-mobile",

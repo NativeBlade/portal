@@ -2619,8 +2619,12 @@ dependencies = [
  "tauri-plugin-geolocation",
  "tauri-plugin-haptics",
  "tauri-plugin-http",
+ "tauri-plugin-nativeblade-analytics",
  "tauri-plugin-nativeblade-media",
  "tauri-plugin-nativeblade-push",
+ "tauri-plugin-nativeblade-review",
+ "tauri-plugin-nativeblade-secure-storage",
+ "tauri-plugin-nativeblade-sharing",
  "tauri-plugin-nfc",
  "tauri-plugin-notification",
  "tauri-plugin-opener",
@@ -5185,6 +5189,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "tauri-plugin-nativeblade-analytics"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "tauri-plugin-nativeblade-media"
 version = "0.1.0"
 dependencies = [
@@ -5198,6 +5214,42 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-nativeblade-push"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tauri-plugin-nativeblade-review"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tauri-plugin-nativeblade-secure-storage"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tauri-plugin-nativeblade-sharing"
 version = "0.1.0"
 dependencies = [
  "log",
