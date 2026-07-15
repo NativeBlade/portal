@@ -107,6 +107,31 @@
                     save(apps) { writeApps(apps); },
                     normalizeUrl,
                     remember: rememberApp,
+                    // Pulls name + icon from the dev server (/__app_meta). Best
+                    // effort: offline servers keep whatever was cached last.
+                    async refreshMeta(url) {
+                        try {
+                            const res = await fetch(url.replace(/\/+$/, '') + '/__app_meta', { signal: AbortSignal.timeout(2500) });
+                            if (!res.ok) return null;
+                            const meta = await res.json();
+                            this.setMeta(url, meta);
+                            return meta;
+                        } catch (e) { return null; }
+                    },
+                    setMeta(url, meta) {
+                        if (!meta) return;
+                        const apps = readApps();
+                        const idx = apps.findIndex((a) => a.url === url);
+                        if (idx < 0) return;
+                        if (meta.name && !apps[idx].name) apps[idx].name = meta.name; // manual rename wins
+                        if (meta.icon) apps[idx].icon = meta.icon;
+                        writeApps(apps);
+                    },
+                    clearHistory() {
+                        const apps = readApps().filter((a) => a.favorite);
+                        writeApps(apps);
+                        return apps;
+                    },
                     remove(url) {
                         const apps = readApps().filter((a) => a.url !== url);
                         writeApps(apps);
@@ -134,6 +159,7 @@
                         const u = normalizeUrl(url);
                         if (!u) return false;
                         rememberApp(u);
+                        this.refreshMeta(u); // fire-and-forget; the reload races it, the Apps screen catches up
                         setBundleAndReload(u);
                         return true;
                     },

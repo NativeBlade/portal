@@ -104,8 +104,9 @@
                             @click="connect(item.url)"
                             class="w-full flex items-center gap-3 bg-white rounded-2xl px-4 py-3 border border-gray-200/60 active:bg-gray-50 transition-colors text-left"
                         >
-                            <div class="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-black flex items-center justify-center">
-                                <x-nativeblade-icon name="globe" size="16" class="text-[#e74c3c]" />
+                            <div class="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-black flex items-center justify-center overflow-hidden">
+                                <img x-show="item.icon" :src="item.icon" class="w-9 h-9 object-cover" alt="">
+                                <x-nativeblade-icon x-show="!item.icon" name="globe" size="16" class="text-[#e74c3c]" />
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="text-[15px] font-medium text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>

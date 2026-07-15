@@ -23,14 +23,20 @@
                 <x-nb-mobile::list inset title="Favorites">
                     <template x-for="item in favorites" :key="item.url">
                         <x-nb-mobile::list-item>
-                            <button
-                                type="button"
-                                @click="connect(item.url)"
-                                class="flex-1 min-w-0 text-left"
-                            >
-                                <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
-                                <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
-                            </button>
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                                    <img x-show="item.icon" :src="item.icon" class="w-10 h-10 object-cover" alt="">
+                                    <x-nativeblade-icon x-show="!item.icon" name="globe" size="18" class="text-gray-400" />
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="connect(item.url)"
+                                    class="flex-1 min-w-0 text-left"
+                                >
+                                    <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
+                                    <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
+                                </button>
+                            </div>
                             <x-slot name="after">
                                 <div class="flex items-center gap-1">
                                     <button
@@ -63,15 +69,21 @@
                 <x-nb-mobile::list inset title="All">
                     <template x-for="item in others" :key="item.url">
                         <x-nb-mobile::list-item>
-                            <button
-                                type="button"
-                                @click="connect(item.url)"
-                                class="flex-1 min-w-0 text-left"
-                            >
-                                <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
-                                <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
-                                <div class="text-[11px] text-gray-400 mt-0.5" x-text="lastAccessLabel(item.lastAccess)"></div>
-                            </button>
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                                    <img x-show="item.icon" :src="item.icon" class="w-10 h-10 object-cover" alt="">
+                                    <x-nativeblade-icon x-show="!item.icon" name="globe" size="18" class="text-gray-400" />
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="connect(item.url)"
+                                    class="flex-1 min-w-0 text-left"
+                                >
+                                    <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
+                                    <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
+                                    <div class="text-[11px] text-gray-400 mt-0.5" x-text="lastAccessLabel(item.lastAccess)"></div>
+                                </button>
+                            </div>
                             <x-slot name="after">
                                 <div class="flex items-center gap-1">
                                     <button
@@ -104,15 +116,21 @@
                 <x-nb-mobile::list inset>
                     <template x-for="item in others" :key="item.url">
                         <x-nb-mobile::list-item>
-                            <button
-                                type="button"
-                                @click="connect(item.url)"
-                                class="flex-1 min-w-0 text-left"
-                            >
-                                <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
-                                <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
-                                <div class="text-[11px] text-gray-400 mt-0.5" x-text="lastAccessLabel(item.lastAccess)"></div>
-                            </button>
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                                    <img x-show="item.icon" :src="item.icon" class="w-10 h-10 object-cover" alt="">
+                                    <x-nativeblade-icon x-show="!item.icon" name="globe" size="18" class="text-gray-400" />
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="connect(item.url)"
+                                    class="flex-1 min-w-0 text-left"
+                                >
+                                    <div class="text-[15px] text-gray-900 truncate" x-text="item.name || displayHost(item.url)"></div>
+                                    <div class="font-mono text-xs text-gray-500 truncate" x-text="item.url"></div>
+                                    <div class="text-[11px] text-gray-400 mt-0.5" x-text="lastAccessLabel(item.lastAccess)"></div>
+                                </button>
+                            </div>
                             <x-slot name="after">
                                 <div class="flex items-center gap-1">
                                     <button
@@ -138,6 +156,20 @@
                 </x-nb-mobile::list>
             </div>
         </template>
+
+        {{-- Clear history --}}
+        <template x-if="apps.length > 0">
+            <div class="px-4 mt-6 pb-4">
+                <button
+                    type="button"
+                    @click="clearHistory()"
+                    class="w-full text-center text-sm font-medium text-red-500 bg-white border border-gray-200/60 rounded-2xl py-3 active:bg-red-50"
+                >
+                    Clear history
+                </button>
+                <p class="text-[11px] text-gray-400 text-center mt-2">Removes all apps except favorites.</p>
+            </div>
+        </template>
     </div>
 
     <script>
@@ -148,10 +180,23 @@
 
                     init() {
                         this.refresh();
+                        // Background: pull fresh name/icon from each dev server
+                        // that is reachable; offline ones keep the cached meta.
+                        for (const app of this.apps) {
+                            window.nbPortal.refreshMeta(app.url).then((meta) => {
+                                if (meta) this.refresh();
+                            });
+                        }
                     },
 
                     refresh() {
                         this.apps = window.nbPortal.list();
+                    },
+
+                    clearHistory() {
+                        if (!window.confirm('Clear history? Favorited apps are kept.')) return;
+                        window.nbPortal.clearHistory();
+                        this.refresh();
                     },
 
                     get favorites() {
