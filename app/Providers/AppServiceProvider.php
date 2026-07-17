@@ -13,8 +13,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '1.8.7';
-    const VERSION_NUMBER = 1008007;
+    CONST VERSION = '2.0.0';
+    const VERSION_NUMBER = 2000000;
 
     public function register(): void
     {
