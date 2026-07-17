@@ -155,11 +155,17 @@
                         }
                         return apps;
                     },
-                    connect(url) {
+                    async connect(url) {
                         const u = normalizeUrl(url);
                         if (!u) return false;
                         rememberApp(u);
-                        this.refreshMeta(u); // fire-and-forget; the reload races it, the Apps screen catches up
+                        // Give the meta fetch a short head start so name/icon are
+                        // saved before the reload; a slow server doesn't hold the
+                        // connection hostage.
+                        await Promise.race([
+                            this.refreshMeta(u),
+                            new Promise((r) => setTimeout(r, 900)),
+                        ]);
                         setBundleAndReload(u);
                         return true;
                     },

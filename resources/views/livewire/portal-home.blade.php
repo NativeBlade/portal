@@ -136,20 +136,29 @@
             @click.self="closeScanner()"
             class="fixed inset-0 z-[60] bg-black flex flex-col"
         >
-            <video x-ref="scannerVideo" autoplay muted playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+            {{-- Hidden until the stream is actually playing: an exposed <video>
+                 without frames renders the WebView's gray play placeholder. --}}
+            <video
+                x-ref="scannerVideo"
+                autoplay muted playsinline
+                :class="videoLive ? 'opacity-100' : 'opacity-0'"
+                class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+            ></video>
 
             {{-- Scan frame guide --}}
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="w-64 h-64 border-2 border-white/80 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"></div>
             </div>
 
-            {{-- Top bar with cancel --}}
-            <div class="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-20 pb-4 bg-gradient-to-b from-black/70 to-transparent">
-                <p class="text-white text-sm font-semibold">Scan QR code</p>
+            {{-- Header: solid white app bar --}}
+            <div class="absolute top-0 left-0 right-0 flex items-center justify-between bg-white shadow-md px-4 pb-3"
+                 style="padding-top: calc(env(safe-area-inset-top, 0px) + 12px)">
+                <span class="w-10"></span>
+                <p class="text-gray-900 text-[16px] font-bold">Scan QR code</p>
                 <button
                     type="button"
                     @click="closeScanner()"
-                    class="w-10 h-10 rounded-full bg-white/20 backdrop-blur text-white flex items-center justify-center active:bg-white/30"
+                    class="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center active:bg-gray-200"
                     aria-label="Close scanner"
                 >
                     <x-nativeblade-icon name="x" size="20" />
@@ -189,6 +198,7 @@
                     connecting: false,
                     recents: [],
                     scanning: false,
+                    videoLive: false,
                     scannerError: '',
                     _scanStream: null,
                     _scanLoop: null,
@@ -222,6 +232,7 @@
                             });
                             const video = this.$refs.scannerVideo;
                             video.srcObject = this._scanStream;
+                            video.addEventListener('playing', () => { this.videoLive = true; }, { once: true });
                             await video.play().catch(() => {});
                             this._tick();
                         } catch (e) {
@@ -255,6 +266,7 @@
 
                     closeScanner() {
                         this.scanning = false;
+                        this.videoLive = false;
                         if (this._scanLoop) {
                             cancelAnimationFrame(this._scanLoop);
                             this._scanLoop = null;
