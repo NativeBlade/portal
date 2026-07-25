@@ -13,8 +13,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '2.3.0';
-    const VERSION_NUMBER = 2000300;
+    CONST VERSION = '2.5.0';
+    const VERSION_NUMBER = 2000500;
 
     public function register(): void
     {
@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
             $config->identifier('com.nativeblade.app')
                 ->version(self::VERSION, self::VERSION_NUMBER)
                 ->minSdk(28)
-                ->targetSdk(35)
+                ->targetSdk(36)
                 ->orientation('portrait')
                 ->statusBar(style: 'dark')
                 ->splashBackground('#0a0a0a')
