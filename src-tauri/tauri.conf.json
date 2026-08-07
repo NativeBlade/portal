@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/dev/tooling/cli/schema.json",
     "productName": "Nativeblade",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "identifier": "com.nativeblade.app",
     "build": {
         "beforeDevCommand": "npx vite --config vite.wasm.config.js",
@@ -22,7 +22,8 @@
                 "decorations": true,
                 "transparent": false,
                 "alwaysOnTop": false,
-                "maximized": false
+                "maximized": false,
+                "shadow": true
             }
         ],
         "withGlobalTauri": true,
@@ -46,7 +47,7 @@
             "icons/icon.ico"
         ],
         "android": {
-            "versionCode": 2000500
+            "versionCode": 2000600
         }
     }
 }
