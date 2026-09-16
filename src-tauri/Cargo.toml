@@ -16,6 +16,7 @@ path = "src/main.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+tauri-plugin-nativeblade-system = { path = "../vendor/nativeblade/nativeblade/rust/plugins/system" }
 nativeblade-tauri = { path = "../vendor/nativeblade/nativeblade/rust" }
 tauri = { version = "2", features = ["tray-icon", "image-png"] }
 serde = { version = "1", features = ["derive"] }
