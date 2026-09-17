@@ -60,6 +60,7 @@ tauri-plugin-nativeblade-review = { path = "../vendor/nativeblade/nativeblade/ru
 tauri-plugin-nativeblade-secure-storage = { path = "../vendor/nativeblade/nativeblade/rust/plugins/secure-storage", optional = true }
 tauri-plugin-nativeblade-sharing = { path = "../vendor/nativeblade/nativeblade/rust/plugins/sharing", optional = true }
 tauri-plugin-nativeblade-analytics = { path = "../vendor/nativeblade/nativeblade/rust/plugins/analytics", optional = true }
+tauri-plugin-nativeblade-sensors = { path = "../vendor/nativeblade/nativeblade/rust/plugins/sensors", optional = true }
 
 # nativeblade:plugins:start
 [features]
@@ -77,6 +78,7 @@ media = ["dep:tauri-plugin-nativeblade-media"]
 nfc = ["dep:tauri-plugin-nfc"]
 push = ["dep:tauri-plugin-nativeblade-push"]
 secure_storage = ["dep:tauri-plugin-nativeblade-secure-storage"]
+sensors = ["dep:tauri-plugin-nativeblade-sensors"]
 sharing = ["dep:tauri-plugin-nativeblade-sharing"]
 upload = ["dep:tauri-plugin-upload"]
 # nativeblade:plugins:end

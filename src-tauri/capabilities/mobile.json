@@ -22,6 +22,7 @@
         "barcode-scanner:allow-vibrate",
         "barcode-scanner:allow-open-app-settings",
         "nfc:default",
-        "nativeblade-system:default"
+        "nativeblade-system:default",
+        "nativeblade-sensors:default"
     ]
 }

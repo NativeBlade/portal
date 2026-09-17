@@ -2624,6 +2624,7 @@ dependencies = [
  "tauri-plugin-nativeblade-push",
  "tauri-plugin-nativeblade-review",
  "tauri-plugin-nativeblade-secure-storage",
+ "tauri-plugin-nativeblade-sensors",
  "tauri-plugin-nativeblade-sharing",
  "tauri-plugin-nativeblade-system",
  "tauri-plugin-nfc",
@@ -5240,6 +5241,18 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-nativeblade-secure-storage"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tauri-plugin-nativeblade-sensors"
 version = "0.1.0"
 dependencies = [
  "log",

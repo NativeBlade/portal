@@ -13,8 +13,8 @@ use NativeBlade\Facades\NativeBladeConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
-    CONST VERSION = '2.9.3';
-    const VERSION_NUMBER = 2000903;
+    CONST VERSION = '2.9.4';
+    const VERSION_NUMBER = 2000904;
 
     public function register(): void
     {
@@ -23,15 +23,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Portal mode: NO plugins() declaration on purpose.
-        // All Tauri plugins are bundled so any user-loaded Laravel bundle
-        // can call any NativeBlade API. Trade-off: every permission text
-        // below is reviewed by Apple, so we explain the portal nature
-        // explicitly in each one.
-
-        NativeBladeConfig::bundlePush(
-            url: 'https://nativeblade.github.io/portal-updates/version.json',
-        );
 
         NativeBladeConfig::name('Nativeblade');
 
@@ -109,6 +100,8 @@ class AppServiceProvider extends ServiceProvider
             Plugin::HTTP,
             Plugin::UPLOAD,
             Plugin::DEEP_LINK,
+            Plugin::SYSTEM,
+            Plugin::SENSORS,
         ]);
 
         NativeBladeConfig::transition('fade');

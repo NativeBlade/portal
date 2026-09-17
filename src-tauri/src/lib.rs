@@ -45,6 +45,9 @@ pub fn run() {
 
     #[cfg(feature = "deep_link")]
     let builder = builder.plugin(tauri_plugin_deep_link::init());
+
+    #[cfg(all(any(target_os = "android", target_os = "ios"), feature = "sensors"))]
+    let builder = builder.plugin(tauri_plugin_nativeblade_sensors::init());
     // nativeblade:plugins:end
 
     builder
